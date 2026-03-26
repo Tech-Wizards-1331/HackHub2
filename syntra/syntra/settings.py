@@ -42,6 +42,8 @@ INSTALLED_APPS = [
     'organizer',
     'participant',
     'volunteers',
+    # Uncomment once social-auth-app-django is installed (pip install social-auth-app-django):
+    # 'social_django',
 ]
 
 MIDDLEWARE = [
@@ -126,3 +128,24 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/6.0/howto/static-files/
 
 STATIC_URL = 'static/'
+
+# ── Social Auth (Google + GitHub OAuth) ──────────────────────────────────────
+# 1. pip install social-auth-app-django
+# 2. Uncomment 'social_django' in INSTALLED_APPS above
+# 3. Uncomment the auth/ path in urls.py
+# 4. Run: python manage.py migrate
+# 5. Fill in credentials from Google Cloud Console / GitHub OAuth App
+
+# AUTHENTICATION_BACKENDS = [
+#     'social_core.backends.google.GoogleOAuth2',
+#     'social_core.backends.github.GithubOAuth2',
+#     'django.contrib.auth.backends.ModelBackend',
+# ]
+# SOCIAL_AUTH_GOOGLE_OAUTH2_KEY    = ''   # from .env
+# SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET = ''   # from .env
+# SOCIAL_AUTH_GITHUB_KEY           = ''   # from .env
+# SOCIAL_AUTH_GITHUB_SECRET        = ''   # from .env
+# LOGIN_URL           = '/login/'
+# LOGIN_REDIRECT_URL  = '/'
+# LOGOUT_REDIRECT_URL = '/login/'
+# ─────────────────────────────────────────────────────────────────────────────

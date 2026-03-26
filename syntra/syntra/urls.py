@@ -15,14 +15,40 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 from django.contrib import admin
+from django.views.generic import TemplateView
 from django.urls import include, path
+from django.contrib.auth.decorators import login_required
+from django.shortcuts import render, redirect
+from django.contrib.auth import get_user_model
+
+def profile_complete_view(request):
+    if request.method == 'POST':
+        data = request.POST
+        user = request.user
+        user.first_name = data.get('full_name', '').split(' ')[0]
+        user.last_name = ' '.join(data.get('full_name', '').split(' ')[1:])
+        user.save()
+        # Store extra fields in session until you have a Profile model
+        request.session['profile_role']         = data.get('role', '')
+        request.session['profile_phone']        = data.get('phone', '')
+        request.session['profile_organisation'] = data.get('organisation', '')
+        request.session['profile_github']       = data.get('github_url', '')
+        request.session['profile_experience']   = data.get('experience_level', '')
+        request.session['profile_skills']       = data.get('skills', '')
+        request.session['profile_complete']     = True
+        return redirect('home')
+    return render(request, 'profile_complete.html')
 
 urlpatterns = [
-    path('', include('super_admin.urls')),
+    path('', TemplateView.as_view(template_name='home.html'), name='home'),
+    path('login/', TemplateView.as_view(template_name='login.html'), name='login'),
+    path('profile/complete/', profile_complete_view, name='profile_complete'),
     path('admin/', admin.site.urls),
     path('super_admin/', include('super_admin.urls')),
     path('judge/', include('judge.urls')),
     path('organizer/', include('organizer.urls')),
     path('participant/', include('participant.urls')),
     path('volunteers/', include('volunteers.urls')),
+    # Uncomment once social-auth-app-django is installed and configured:
+    # path('auth/', include('social_django.urls', namespace='social')),
 ]
