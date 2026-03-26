@@ -1,0 +1,13 @@
+# Python bytecode and cache directories
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Environment variables
+.env
+
+# Django
+*.sqlite3
+__pycache__/
+*.pyc
+.env
