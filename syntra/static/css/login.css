@@ -173,6 +173,36 @@ a:hover { color: #5eead4; }
     background: linear-gradient(160deg, rgba(3, 9, 28, 0.97), rgba(2, 6, 18, 0.99));
 }
 
+/* ---------------- Form Controls (Django widgets) ---------------- */
+.form-box.login .form-label {
+    color: var(--text-soft);
+    font-size: 0.85rem;
+    margin-bottom: 6px;
+}
+
+.form-box.login input[type="email"],
+.form-box.login input[type="password"],
+.form-box.login input[type="text"],
+.form-box.login select {
+    width: 100%;
+    border-radius: 12px;
+    border: 1px solid rgba(148, 163, 184, 0.26);
+    background: rgba(11, 18, 32, 0.65);
+    color: var(--text);
+    padding: 0.7rem 0.9rem;
+    outline: none;
+}
+
+.form-box.login input::placeholder {
+    color: rgba(145, 163, 194, 0.8);
+}
+
+.form-box.login input:focus,
+.form-box.login select:focus {
+    border-color: rgba(45, 212, 191, 0.65);
+    box-shadow: 0 0 0 3px rgba(45, 212, 191, 0.12);
+}
+
 /* ---------------- OAuth Buttons ---------------- */
 .oauth-btn {
     padding: 0.7rem 1.2rem;
