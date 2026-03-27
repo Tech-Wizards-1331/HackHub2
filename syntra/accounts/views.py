@@ -136,12 +136,27 @@ def complete_profile_view(request):
         return redirect_by_role(user)
 
     form = ProfileCompletionForm(request.POST or None, instance=user)
-    if request.method == 'POST' and form.is_valid():
-        form.save()
-        user.is_profile_complete = True
-        user.save(update_fields=['is_profile_complete', 'updated_at'])
-        messages.success(request, 'Profile completed successfully.')
-        return redirect_by_role(user)
+    if request.method == 'POST':
+        # The transferred template posts extra fields (role/phone/etc.).
+        # Only full_name + role are persisted; the rest is kept in session for now.
+        if form.is_valid():
+            form.save()
+
+            posted_role = (request.POST.get('role') or '').strip().lower()
+            allowed_roles = {choice[0] for choice in User.ROLE_CHOICES}
+            if posted_role in allowed_roles:
+                user.role = posted_role
+
+            request.session['profile_phone'] = (request.POST.get('phone') or '').strip()
+            request.session['profile_organisation'] = (request.POST.get('organisation') or '').strip()
+            request.session['profile_github'] = (request.POST.get('github_url') or '').strip()
+            request.session['profile_experience'] = (request.POST.get('experience_level') or '').strip()
+            request.session['profile_skills'] = (request.POST.get('skills') or '').strip()
+
+            user.is_profile_complete = True
+            user.save(update_fields=['role', 'is_profile_complete', 'updated_at'])
+            messages.success(request, 'Profile completed successfully.')
+            return redirect_by_role(user)
 
     return render(request, 'accounts/complete_profile.html', {'form': form})
 

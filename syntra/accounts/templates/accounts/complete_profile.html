@@ -1,36 +1,160 @@
-{% extends 'accounts/base_auth.html' %}
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
 
-{% block title %}Complete Profile | Syntra{% endblock %}
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Syntra | Complete Your Profile</title>
 
-{% block content %}
-    <h1 class="font-display text-3xl font-bold tracking-tight">Complete your profile</h1>
-    <p class="mt-1 text-sm text-authMuted">Finish this once to unlock your dashboard.</p>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Orbitron:wght@500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/profile_complete.css' %}">
+</head>
 
-    <form method="post" class="mt-6 space-y-4">
-        {% csrf_token %}
+<body>
 
-        <div>
-            <label class="mb-1.5 block text-sm font-medium" for="{{ form.full_name.id_for_label }}">Full name</label>
-            {{ form.full_name }}
-            {% for error in form.full_name.errors %}
-                <p class="mt-1 text-xs text-rose-300">{{ error }}</p>
-            {% endfor %}
-        </div>
+    <div class="grid-bg"></div>
 
-        {% if form.non_field_errors %}
-            <div class="rounded-xl border border-err/40 bg-err/10 px-3 py-2 text-sm text-rose-200">
-                {% for error in form.non_field_errors %}
-                    <p>{{ error }}</p>
-                {% endfor %}
+    <div class="profile-container">
+        <div class="profile-card">
+
+            <!-- Header -->
+            <div class="profile-header">
+                <a href="{% url 'home' %}" class="brand-logo">
+                    <span class="brand-icon">HH</span>
+                    <span class="brand-name">Syntra</span>
+                </a>
+                <h1>Complete Your Profile</h1>
+                <p>Just a few details and you're in.</p>
             </div>
-        {% endif %}
 
-        <button type="submit" class="w-full rounded-xl border border-brand/50 bg-gradient-to-r from-cyan-400/30 to-amber-400/25 px-4 py-2.5 font-semibold text-cyan-100 transition hover:-translate-y-0.5 hover:border-cyan-300/80">
-            Save and continue
-        </button>
-    </form>
+            <!-- Form -->
+            <form method="post" action="{% url 'complete_profile' %}" id="profileForm" novalidate>
+                {% csrf_token %}
 
-    <div class="mt-5 rounded-xl border border-authLine bg-authPanelSoft/60 px-3 py-2 text-xs text-authMuted">
-        Note: Your role controls which dashboard you access.
+                {% if messages %}
+                    {% for message in messages %}
+                        <div class="auth-msg auth-msg-{{ message.tags }}">{{ message }}</div>
+                    {% endfor %}
+                {% endif %}
+
+                <!-- Pre-filled from OAuth (read-only) -->
+                <div class="section-label label-teal">From your account</div>
+                <div class="row g-3 mb-3">
+                    <div class="col-md-6">
+                        <label class="form-label">Full Name</label>
+                        <input type="text" class="form-control" name="full_name"
+                               value="{{ user.get_full_name }}" required>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Email</label>
+                        <input type="email" class="form-control" name="email"
+                               value="{{ user.email }}" readonly>
+                    </div>
+                </div>
+
+                <!-- Role -->
+                <div class="section-label label-amber">Your role on Syntra</div>
+                <div class="role-grid mb-4">
+                    <label class="role-card role-teal">
+                        <input type="radio" name="role" value="participant" required>
+                        <span class="role-icon"><i class="fa-solid fa-code"></i></span>
+                        <span class="role-title">Participant</span>
+                        <span class="role-desc">Join hackathons, form teams, submit projects</span>
+                    </label>
+                    <label class="role-card role-amber">
+                        <input type="radio" name="role" value="organiser">
+                        <span class="role-icon"><i class="fa-solid fa-calendar-check"></i></span>
+                        <span class="role-title">Organiser</span>
+                        <span class="role-desc">Create and manage hackathon events</span>
+                    </label>
+                    <label class="role-card role-rose">
+                        <input type="radio" name="role" value="judge">
+                        <span class="role-icon"><i class="fa-solid fa-gavel"></i></span>
+                        <span class="role-title">Judge</span>
+                        <span class="role-desc">Evaluate and score submissions</span>
+                    </label>
+                    <label class="role-card role-teal">
+                        <input type="radio" name="role" value="volunteer">
+                        <span class="role-icon"><i class="fa-solid fa-hands-helping"></i></span>
+                        <span class="role-title">Volunteer</span>
+                        <span class="role-desc">Support event operations on the ground</span>
+                    </label>
+                </div>
+
+                <!-- Extra details -->
+                <div class="section-label label-rose">A bit more about you</div>
+                <div class="row g-3 mb-3">
+                    <div class="col-md-6">
+                        <label class="form-label">Phone Number</label>
+                        <input type="tel" class="form-control" name="phone"
+                               placeholder="10-digit mobile number" maxlength="10">
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">College / Organisation</label>
+                        <input type="text" class="form-control" name="organisation"
+                               placeholder="Where are you from?" required>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">GitHub Profile <span class="optional">(optional)</span></label>
+                        <input type="url" class="form-control" name="github_url"
+                               placeholder="https://github.com/username">
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Experience Level</label>
+                        <select class="form-control" name="experience_level">
+                            <option value="" disabled selected style="color:#475569;">Select your level</option>
+                            <option value="beginner">Beginner</option>
+                            <option value="intermediate">Intermediate</option>
+                            <option value="advanced">Advanced</option>
+                        </select>
+                    </div>
+
+                    <!-- Skills — shown only for Participant -->
+                    <div class="col-12" id="skills-field" style="display:none;">
+                        <label class="form-label">Your Skills <span class="optional">(add up to 10)</span></label>
+                        <div class="skills-input-wrap" id="skillsWrap">
+                            <div class="skills-tags" id="skillsTags"></div>
+                            <input type="text" id="skillsInput" class="skills-text-input"
+                                   placeholder="Other skills… press Enter to add" autocomplete="off">
+                        </div>
+                        <input type="hidden" name="skills" id="skillsHidden">
+                        <p class="skills-hint">e.g. Python, React, Machine Learning, UI/UX</p>
+
+                        <!-- Quick-pick checkboxes -->
+                        <p class="skills-hint mt-3 mb-2" style="color:#91a3c2;">Or pick from common skills:</p>
+                        <div class="skills-quickpick">
+                            <label class="qp-chip"><input type="checkbox" value="Web Development (Frontend)"><span>Web Development (Frontend)</span></label>
+                            <label class="qp-chip"><input type="checkbox" value="Web Development (Backend)"><span>Web Development (Backend)</span></label>
+                            <label class="qp-chip"><input type="checkbox" value="Full Stack Development"><span>Full Stack Development</span></label>
+                            <label class="qp-chip"><input type="checkbox" value="API Development"><span>API Development</span></label>
+                            <label class="qp-chip"><input type="checkbox" value="Python"><span>Python</span></label>
+                            <label class="qp-chip"><input type="checkbox" value="JavaScript"><span>JavaScript</span></label>
+                            <label class="qp-chip"><input type="checkbox" value="Java"><span>Java</span></label>
+                            <label class="qp-chip"><input type="checkbox" value="C / C++"><span>C / C++</span></label>
+                            <label class="qp-chip"><input type="checkbox" value="Data Science"><span>Data Science</span></label>
+                            <label class="qp-chip"><input type="checkbox" value="Docker"><span>Docker</span></label>
+                            <label class="qp-chip"><input type="checkbox" value="CI/CD"><span>CI/CD</span></label>
+                            <label class="qp-chip"><input type="checkbox" value="UI/UX Design"><span>UI/UX Design</span></label>
+                            <label class="qp-chip"><input type="checkbox" value="Blockchain"><span>Blockchain</span></label>
+                        </div>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn-submit w-100">
+                    Save &amp; Continue <i class="fa-solid fa-arrow-right ms-2"></i>
+                </button>
+
+            </form>
+
+        </div>
     </div>
-{% endblock %}
+
+    <script src="{% static 'js/profile_complete.js' %}"></script>
+
+</body>
+</html>
