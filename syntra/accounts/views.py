@@ -1,11 +1,10 @@
 from django.contrib import messages
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
+from django.conf import settings
 from django.shortcuts import redirect, render
+from django.urls import reverse
 from django.utils.http import url_has_allowed_host_and_scheme
-from allauth.socialaccount.models import SocialApp
-from allauth.socialaccount.providers.github.views import oauth2_login as github_oauth2_login
-from allauth.socialaccount.providers.google.views import oauth2_login as google_oauth2_login
 
 from .forms import LoginForm, ProfileCompletionForm, RoleSelectionForm, SignUpForm
 from .models import User
@@ -136,36 +135,66 @@ def complete_profile_view(request):
         return redirect_by_role(user)
 
     form = ProfileCompletionForm(request.POST or None, instance=user)
-    if request.method == 'POST' and form.is_valid():
-        form.save()
-        user.is_profile_complete = True
-        user.save(update_fields=['is_profile_complete', 'updated_at'])
-        messages.success(request, 'Profile completed successfully.')
-        return redirect_by_role(user)
+    if request.method == 'POST':
+        # The transferred template posts extra fields (role/phone/etc.).
+        # Only full_name + role are persisted; the rest is kept in session for now.
+        if form.is_valid():
+            form.save()
+
+            posted_role = (request.POST.get('role') or '').strip().lower()
+            allowed_roles = {choice[0] for choice in User.ROLE_CHOICES}
+            if posted_role in allowed_roles:
+                user.role = posted_role
+
+            request.session['profile_phone'] = (request.POST.get('phone') or '').strip()
+            request.session['profile_organisation'] = (request.POST.get('organisation') or '').strip()
+            request.session['profile_github'] = (request.POST.get('github_url') or '').strip()
+            request.session['profile_experience'] = (request.POST.get('experience_level') or '').strip()
+            request.session['profile_skills'] = (request.POST.get('skills') or '').strip()
+
+            user.is_profile_complete = True
+            user.save(update_fields=['role', 'is_profile_complete', 'updated_at'])
+            messages.success(request, 'Profile completed successfully.')
+            return redirect_by_role(user)
 
     return render(request, 'accounts/complete_profile.html', {'form': form})
 
 
 def google_login_entry(request):
-    try:
-        return google_oauth2_login(request)
-    except SocialApp.DoesNotExist:
+    # Legacy entry point kept for templates/backwards compatibility.
+    # Redirect to allauth's canonical provider URL so Google redirect URIs stay stable.
+    app_cfg = (settings.SOCIALACCOUNT_PROVIDERS.get('google') or {}).get('APP') or {}
+    configured = bool(app_cfg.get('client_id') and app_cfg.get('secret'))
+    if not configured:
         messages.error(
             request,
-            'Google login is not configured. Add a Google SocialApp in /admin/.',
+            'Google login is not configured. Set GOOGLE_CLIENT_ID/GOOGLE_CLIENT_SECRET or add a Google SocialApp in /admin/.',
         )
         return redirect('login')
+
+    query_string = request.META.get('QUERY_STRING')
+    target = reverse('google_login')
+    if query_string:
+        target = f'{target}?{query_string}'
+    return redirect(target)
 
 
 def github_login_entry(request):
-    try:
-        return github_oauth2_login(request)
-    except SocialApp.DoesNotExist:
+    # Legacy entry point kept for templates/backwards compatibility.
+    app_cfg = (settings.SOCIALACCOUNT_PROVIDERS.get('github') or {}).get('APP') or {}
+    configured = bool(app_cfg.get('client_id') and app_cfg.get('secret'))
+    if not configured:
         messages.error(
             request,
-            'GitHub login is not configured. Add a GitHub SocialApp in /admin/.',
+            'GitHub login is not configured. Set GITHUB_CLIENT_ID/GITHUB_CLIENT_SECRET or add a GitHub SocialApp in /admin/.',
         )
         return redirect('login')
+
+    query_string = request.META.get('QUERY_STRING')
+    target = reverse('github_login')
+    if query_string:
+        target = f'{target}?{query_string}'
+    return redirect(target)
 
 
 def redirect_by_role(user):
