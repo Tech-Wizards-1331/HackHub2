@@ -1,4 +1,5 @@
 from django.contrib.auth import authenticate
+from django.db import IntegrityError
 from rest_framework import serializers
 
 from .models import User
@@ -24,7 +25,10 @@ class RegisterSerializer(serializers.Serializer):
     def create(self, validated_data):
         validated_data.pop('password2')
         password = validated_data.pop('password')
-        user = User.objects.create_user(password=password, **validated_data)
+        try:
+            user = User.objects.create_user(password=password, **validated_data)
+        except IntegrityError:
+            raise serializers.ValidationError({'email': 'An account with this email already exists.'})
         return user
 
 
