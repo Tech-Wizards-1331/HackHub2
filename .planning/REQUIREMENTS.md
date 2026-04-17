@@ -112,47 +112,47 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| AUTH-01 | — | Pending |
-| AUTH-02 | — | Pending |
-| AUTH-03 | — | Pending |
-| AUTH-04 | — | Pending |
-| HACK-01 | — | Pending |
-| HACK-02 | — | Pending |
-| HACK-03 | — | Pending |
-| HACK-04 | — | Pending |
-| HACK-05 | — | Pending |
-| PART-01 | — | Pending |
-| PART-02 | — | Pending |
-| PART-03 | — | Pending |
-| PART-04 | — | Pending |
-| PART-05 | — | Pending |
-| PART-06 | — | Pending |
-| SUBM-01 | — | Pending |
-| SUBM-02 | — | Pending |
-| JUDG-01 | — | Pending |
-| JUDG-02 | — | Pending |
-| JUDG-03 | — | Pending |
-| JUDG-04 | — | Pending |
-| JUDG-05 | — | Pending |
-| JUDG-06 | — | Pending |
-| OPER-01 | — | Pending |
-| OPER-02 | — | Pending |
-| OPER-03 | — | Pending |
-| OPER-04 | — | Pending |
-| OPER-05 | — | Pending |
-| OPER-06 | — | Pending |
-| OPER-07 | — | Pending |
-| NOTF-01 | — | Pending |
-| NOTF-02 | — | Pending |
-| NOTF-03 | — | Pending |
-| CORE-01 | — | Pending |
-| CORE-02 | — | Pending |
-| CORE-03 | — | Pending |
+| CORE-01 | Phase 1 | Pending |
+| CORE-02 | Phase 1 | Pending |
+| AUTH-01 | Phase 1 | Pending |
+| AUTH-02 | Phase 1 | Pending |
+| AUTH-03 | Phase 1 | Pending |
+| AUTH-04 | Phase 1 | Pending |
+| HACK-01 | Phase 2 | Pending |
+| HACK-02 | Phase 2 | Pending |
+| HACK-03 | Phase 2 | Pending |
+| HACK-04 | Phase 2 | Pending |
+| HACK-05 | Phase 2 | Pending |
+| PART-01 | Phase 2 | Pending |
+| PART-02 | Phase 2 | Pending |
+| PART-03 | Phase 2 | Pending |
+| PART-04 | Phase 2 | Pending |
+| PART-05 | Phase 2 | Pending |
+| PART-06 | Phase 2 | Pending |
+| SUBM-01 | Phase 3 | Pending |
+| SUBM-02 | Phase 3 | Pending |
+| JUDG-01 | Phase 3 | Pending |
+| JUDG-02 | Phase 3 | Pending |
+| JUDG-03 | Phase 3 | Pending |
+| JUDG-04 | Phase 3 | Pending |
+| JUDG-05 | Phase 3 | Pending |
+| JUDG-06 | Phase 3 | Pending |
+| OPER-01 | Phase 4 | Pending |
+| OPER-02 | Phase 4 | Pending |
+| OPER-03 | Phase 4 | Pending |
+| OPER-04 | Phase 4 | Pending |
+| OPER-05 | Phase 4 | Pending |
+| OPER-06 | Phase 4 | Pending |
+| OPER-07 | Phase 4 | Pending |
+| NOTF-01 | Phase 4 | Pending |
+| NOTF-02 | Phase 4 | Pending |
+| NOTF-03 | Phase 4 | Pending |
+| CORE-03 | Phase 4 | Pending |
 
 **Coverage:**
 - v1 requirements: 36 total
-- Mapped to phases: 0
-- Unmapped: 36 ⚠️
+- Mapped to phases: 36
+- Unmapped: 0 ✓
 
 ---
 *Requirements defined: 2026-04-17*
