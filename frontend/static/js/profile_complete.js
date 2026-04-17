@@ -1,24 +1,4 @@
-// Phone: digits only, max 10
-const phoneInput = document.querySelector('input[name="phone"]');
-if (phoneInput) {
-    phoneInput.addEventListener('input', function () {
-        this.value = this.value.replace(/\D/g, '').slice(0, 10);
-    });
-}
-
-// Show/hide skills field based on role selection
-const skillsField = document.getElementById('skills-field');
-document.querySelectorAll('.role-card input[type="radio"]').forEach(radio => {
-    radio.addEventListener('change', () => {
-        document.querySelectorAll('.role-card').forEach(c => c.classList.remove('selected'));
-        if (radio.checked) {
-            radio.closest('.role-card').classList.add('selected');
-            skillsField.style.display = radio.value === 'participant' ? 'block' : 'none';
-        }
-    });
-});
-
-// Skills tag input
+// Skills tag input — only runs if the skills section is present (Participant role)
 const skillsInput  = document.getElementById('skillsInput');
 const skillsTags   = document.getElementById('skillsTags');
 const skillsHidden = document.getElementById('skillsHidden');
@@ -32,6 +12,7 @@ function syncCheckboxes() {
 }
 
 function renderTags() {
+    if (!skillsTags) return;
     skillsTags.innerHTML = '';
     skills.forEach((skill, i) => {
         const tag = document.createElement('span');
@@ -44,7 +25,9 @@ function renderTags() {
         });
         skillsTags.appendChild(tag);
     });
-    skillsHidden.value = skills.join(',');
+    if (skillsHidden) {
+        skillsHidden.value = skills.join(',');
+    }
 }
 
 if (skillsInput) {

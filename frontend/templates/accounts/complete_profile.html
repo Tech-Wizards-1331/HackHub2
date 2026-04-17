@@ -42,13 +42,13 @@
                     {% endfor %}
                 {% endif %}
 
-                <!-- Pre-filled from OAuth (read-only) -->
+                <!-- Pre-filled from account (read-only email) -->
                 <div class="section-label label-teal">From your account</div>
                 <div class="row g-3 mb-3">
                     <div class="col-md-6">
                         <label class="form-label">Full Name</label>
                         <input type="text" class="form-control" name="full_name"
-                               value="{{ user.get_full_name }}" required>
+                               value="{{ user.full_name }}" required>
                     </div>
                     <div class="col-md-6">
                         <label class="form-label">Email</label>
@@ -57,70 +57,42 @@
                     </div>
                 </div>
 
-                <!-- Role -->
-                <div class="section-label label-amber">Your role on Syntra</div>
-                <div class="role-grid mb-4">
-                    <label class="role-card role-teal">
-                        <input type="radio" name="role" value="participant" required>
-                        <span class="role-icon"><i class="fa-solid fa-code"></i></span>
-                        <span class="role-title">Participant</span>
-                        <span class="role-desc">Join hackathons, form teams, submit projects</span>
-                    </label>
-                    <label class="role-card role-amber">
-                        <input type="radio" name="role" value="organiser">
-                        <span class="role-icon"><i class="fa-solid fa-calendar-check"></i></span>
-                        <span class="role-title">Organiser</span>
-                        <span class="role-desc">Create and manage hackathon events</span>
-                    </label>
-                    <label class="role-card role-rose">
-                        <input type="radio" name="role" value="judge">
-                        <span class="role-icon"><i class="fa-solid fa-gavel"></i></span>
-                        <span class="role-title">Judge</span>
-                        <span class="role-desc">Evaluate and score submissions</span>
-                    </label>
-                    <label class="role-card role-teal">
-                        <input type="radio" name="role" value="volunteer">
-                        <span class="role-icon"><i class="fa-solid fa-hands-helping"></i></span>
-                        <span class="role-title">Volunteer</span>
-                        <span class="role-desc">Support event operations on the ground</span>
-                    </label>
+                <!-- Role-specific fields -->
+                <div class="section-label label-amber">
+                    {% if user_role == 'participant' %}
+                        Participant Details
+                    {% elif user_role == 'organizer' %}
+                        Organizer Details
+                    {% elif user_role == 'judge' %}
+                        Judge Details
+                    {% elif user_role == 'volunteer' %}
+                        Almost done!
+                    {% else %}
+                        Additional Details
+                    {% endif %}
                 </div>
 
-                <!-- Extra details -->
-                <div class="section-label label-rose">A bit more about you</div>
                 <div class="row g-3 mb-3">
-                    <div class="col-md-6">
-                        <label class="form-label">Phone Number</label>
-                        <input type="tel" class="form-control" name="phone"
-                               placeholder="10-digit mobile number" maxlength="10">
-                    </div>
-                    <div class="col-md-6">
-                        <label class="form-label">College / Organisation</label>
-                        <input type="text" class="form-control" name="organisation"
-                               placeholder="Where are you from?" required>
-                    </div>
-                    <div class="col-md-6">
-                        <label class="form-label">GitHub Profile <span class="optional">(optional)</span></label>
-                        <input type="url" class="form-control" name="github_url"
-                               placeholder="https://github.com/username">
-                    </div>
-                    <div class="col-md-6">
-                        <label class="form-label">Experience Level</label>
-                        <select class="form-control" name="experience_level">
-                            <option value="" disabled selected style="color:#475569;">Select your level</option>
-                            <option value="beginner">Beginner</option>
-                            <option value="intermediate">Intermediate</option>
-                            <option value="advanced">Advanced</option>
-                        </select>
-                    </div>
+                    {% for field in profile_form %}
+                        <div class="col-md-6">
+                            <label class="form-label" for="{{ field.id_for_label }}">{{ field.label }}</label>
+                            {{ field }}
+                            {% for error in field.errors %}
+                                <p class="mt-1 text-xs" style="color: #fda4af;">{{ error }}</p>
+                            {% endfor %}
+                        </div>
+                    {% endfor %}
+                </div>
 
-                    <!-- Skills — shown only for Participant -->
-                    <div class="col-12" id="skills-field" style="display:none;">
-                        <label class="form-label">Your Skills <span class="optional">(add up to 10)</span></label>
+                {% if is_participant %}
+                    <!-- Skills Section (Participant only) -->
+                    <div class="section-label label-rose">Your Skills</div>
+                    <div class="col-12 mb-3" id="skills-field">
+                        <label class="form-label">Skills <span class="optional">(add up to 10)</span></label>
                         <div class="skills-input-wrap" id="skillsWrap">
                             <div class="skills-tags" id="skillsTags"></div>
                             <input type="text" id="skillsInput" class="skills-text-input"
-                                   placeholder="Other skills… press Enter to add" autocomplete="off">
+                                   placeholder="Type a skill… press Enter to add" autocomplete="off">
                         </div>
                         <input type="hidden" name="skills" id="skillsHidden">
                         <p class="skills-hint">e.g. Python, React, Machine Learning, UI/UX</p>
@@ -143,7 +115,45 @@
                             <label class="qp-chip"><input type="checkbox" value="Blockchain"><span>Blockchain</span></label>
                         </div>
                     </div>
-                </div>
+
+                    {% if has_github %}
+                        <div class="rounded-xl mb-3" style="border: 1px solid rgba(45,212,191,0.3); background: rgba(45,212,191,0.06); padding: 10px 14px;">
+                            <p style="font-size: 0.85rem; color: #99f6e4; margin: 0;">
+                                <i class="fa-brands fa-github" style="margin-right: 6px;"></i>
+                                GitHub linked automatically from your account.
+                            </p>
+                        </div>
+                    {% endif %}
+                {% endif %}
+
+                {% if user_role == 'volunteer' %}
+                    <div class="rounded-xl mb-3" style="border: 1px solid rgba(234,179,8,0.3); background: rgba(234,179,8,0.06); padding: 10px 14px;">
+                        <p style="font-size: 0.85rem; color: #fde047; margin: 0;">
+                            <i class="fa-solid fa-hands-helping" style="margin-right: 6px;"></i>
+                            No extra details needed — just confirm your name above and you're good to go!
+                        </p>
+                    </div>
+                {% endif %}
+
+                <!-- Form errors -->
+                {% if form.errors %}
+                    <div class="auth-msg auth-msg-error mb-3">
+                        {% for field, errors in form.errors.items %}
+                            {% for error in errors %}
+                                <p>{{ error }}</p>
+                            {% endfor %}
+                        {% endfor %}
+                    </div>
+                {% endif %}
+                {% if profile_form.errors %}
+                    <div class="auth-msg auth-msg-error mb-3">
+                        {% for field, errors in profile_form.errors.items %}
+                            {% for error in errors %}
+                                <p>{{ error }}</p>
+                            {% endfor %}
+                        {% endfor %}
+                    </div>
+                {% endif %}
 
                 <button type="submit" class="btn-submit w-100">
                     Save &amp; Continue <i class="fa-solid fa-arrow-right ms-2"></i>
