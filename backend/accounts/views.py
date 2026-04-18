@@ -11,13 +11,15 @@ import logging
 
 from django.contrib import messages
 from django.contrib.auth import authenticate, login, logout
+from urllib.parse import urlencode
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import MultipleObjectsReturned
-from django.http import HttpRequest, HttpResponse
+from django.http import HttpRequest, HttpResponse, JsonResponse
 from django.shortcuts import redirect, render
 from django.urls import reverse
 from django.utils.http import url_has_allowed_host_and_scheme
 from django.views.decorators.cache import never_cache
+from django.views.decorators.http import require_POST
 from allauth.socialaccount.adapter import get_adapter
 from allauth.socialaccount.models import SocialApp
 
@@ -114,11 +116,26 @@ def login_view(request: HttpRequest) -> HttpResponse:
     return render(request, 'accounts/login.html', {'form': form, 'next': safe_next or ''})
 
 
+@require_POST
 @login_required
 def logout_view(request: HttpRequest) -> HttpResponse:
-    """Log the user out and redirect to login."""
+    """Log the user out and redirect to login.
+
+    Returns JSON for fetch() calls (Accept: application/json),
+    otherwise redirects to the login page.
+    """
     logout(request)
-    return redirect('login')
+
+    # fetch()-based logout → return JSON so JS can handle redirect
+    if 'application/json' in request.headers.get('Accept', ''):
+        resp = JsonResponse({'ok': True})
+        resp.delete_cookie('sessionid')
+        return resp
+
+    # Regular form POST fallback
+    response = redirect('/accounts/login/')
+    response.delete_cookie('sessionid')
+    return response
 
 
 # ──────────────────────────────────────────────────────────────────────────────
