@@ -1,3 +1,4 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -5,6 +6,7 @@
     <title>Volunteers</title>
 </head>
 <body>
-	<a href="{% url 'logout' %}" style="position:fixed; top:16px; right:16px;">Logout</a>
+	<button type="button" onclick="syntraLogout()" style="position:fixed; top:16px; right:16px;">Logout</button>
+	<script src="{% static 'js/logout.js' %}"></script>
 </body>
 </html>

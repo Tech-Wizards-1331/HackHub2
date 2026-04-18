@@ -104,6 +104,9 @@ SOCIALACCOUNT_QUERY_EMAIL = True
 SOCIALACCOUNT_PROVIDERS = {
     'google': {
         'SCOPE': ['profile', 'email'],
+        'AUTH_PARAMS': {
+            'prompt': 'select_account',
+        },
         'APP': {
             'client_id': os.getenv('GOOGLE_CLIENT_ID', '').strip(),
             'secret': os.getenv('GOOGLE_CLIENT_SECRET', '').strip(),
