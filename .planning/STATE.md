@@ -8,5 +8,4 @@ See: .planning/PROJECT.md (updated 2026-04-19)
 
 ## Accumulated Context
 ### Roadmap Evolution
-- Phase 3 added: create frontend for Sub-Admin (Organizer)
-- Phase 4 added: Celery automated hackathon status updates
+- (Roadmap pruned - Phase 3 and 4 removed by user request)
