@@ -36,3 +36,13 @@ Plans:
 
 Plans:
 - [ ] TBD (run /gsd-plan-phase 4 to break down)
+
+### Phase 5: IMPLEMENT DYNAMIC COORDINATOR RESPONSIBILITY SYSTEM
+
+**Goal:** [To be planned]
+**Requirements**: TBD
+**Depends on:** Phase 4
+**Plans:** 0 plans
+
+Plans:
+- [ ] TBD (run /gsd-plan-phase 5 to break down)
