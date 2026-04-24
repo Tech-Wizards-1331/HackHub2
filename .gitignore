@@ -11,3 +11,6 @@ __pycache__/
 __pycache__/
 *.pyc
 .env
+
+# GSD Planning
+.planning/
