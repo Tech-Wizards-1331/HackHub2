@@ -135,6 +135,48 @@ def update_hackathon_registration_statuses(self):
 
 
 # ---------------------------------------------------------------------------
+# Email Tasks
+# ---------------------------------------------------------------------------
+
+@shared_task(
+    name='organizer.tasks.send_coordinator_invite_email',
+    bind=True,
+    max_retries=3,
+    default_retry_delay=30,
+)
+def send_coordinator_invite_email(self, email: str, hackathon_name: str, invite_url: str):
+    """Asynchronously send an HTML invite email to a new coordinator."""
+    from django.core.mail import EmailMultiAlternatives
+    from django.template.loader import render_to_string
+    from django.utils.html import strip_tags
+    from django.conf import settings
+
+    subject = f"You have been invited as a Coordinator for {hackathon_name}"
+    
+    context = {
+        'hackathon_name': hackathon_name,
+        'invite_url': invite_url,
+    }
+    
+    html_content = render_to_string('emails/coordinator_invite.html', context)
+    text_content = strip_tags(html_content)
+
+    msg = EmailMultiAlternatives(
+        subject,
+        text_content,
+        getattr(settings, 'DEFAULT_FROM_EMAIL', 'Syntra <noreply@syntra.dev>'),
+        [email]
+    )
+    msg.attach_alternative(html_content, "text/html")
+
+    try:
+        msg.send(fail_silently=False)
+        logger.info(f"[Celery] Successfully sent coordinator invite email to {email}")
+    except Exception as exc:
+        logger.exception(f"[Celery] Failed to send coordinator invite email to {email}: {exc}")
+        raise self.retry(exc=exc)
+
+# ---------------------------------------------------------------------------
 # Race-condition pattern — for use in the future participant app
 # ---------------------------------------------------------------------------
 #

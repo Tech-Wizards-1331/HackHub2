@@ -257,7 +257,7 @@
                 <!-- Tabs -->
                 <ul class="nav manage-tabs" id="manageTabs">
                     <li class="nav-item"><a class="nav-link active" data-bs-toggle="tab" href="#tab-actions">Actions</a></li>
-                    <li class="nav-item"><a class="nav-link" data-bs-toggle="tab" href="#tab-coordinators">Coordinators</a></li>
+                    <li class="nav-item"><a class="nav-link" data-bs-toggle="tab" href="#tab-coordinators" id="tab-coordinators-trigger">Coordinators</a></li>
                     <li class="nav-item"><a class="nav-link" data-bs-toggle="tab" href="#tab-problems" id="tab-problems-trigger">Problems</a></li>
                 </ul>
 
@@ -297,16 +297,47 @@
                     <!-- Coordinators Tab -->
                     <div class="tab-pane fade" id="tab-coordinators">
                         <div id="coordinator-api-message" class="form-alert mb-3 d-none"></div>
-                        <p class="text-muted small mb-3">Assign a user as a coordinator for this hackathon. They'll get scoped access to manage this event.</p>
+                        
+                        <!-- List of current coordinators -->
+                        <div id="coord-list-loading" class="text-center py-3" style="display:none;">
+                            <i class="fas fa-circle-notch fa-spin me-2"></i>Loading...
+                        </div>
+                        <div id="coord-list-empty" class="text-center py-4" style="display:none;">
+                            <p class="text-muted small mb-0">No coordinators assigned yet.</p>
+                        </div>
+                        <div id="coordinator-list" class="action-list mb-4"></div>
+
+                        <hr class="my-4">
+
+                        <h6 class="mb-3">Assign New Coordinator</h6>
                         <form id="assign-coordinator-form">
-                            <label class="form-label">Email Address</label>
-                            <div class="d-flex gap-2">
+                            <div class="mb-3">
+                                <label class="form-label">Email Address</label>
                                 <input type="email" class="form-control" name="coordinator_email" placeholder="user@example.com" required>
-                                <button class="btn create-btn px-4 flex-shrink-0" type="submit" id="assign-btn">
-                                    <span id="assign-btn-text">Assign</span>
-                                    <span id="assign-btn-spinner" class="d-none"><i class="fas fa-circle-notch fa-spin"></i></span>
-                                </button>
                             </div>
+                            
+                            <div class="mb-3">
+                                <label class="form-label">Responsibilities</label>
+                                <div class="d-flex flex-wrap gap-3">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" name="responsibilities" value="problem_statements" id="resp-ps">
+                                        <label class="form-check-label" for="resp-ps">Problems</label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" name="responsibilities" value="teams" id="resp-teams">
+                                        <label class="form-check-label" for="resp-teams">Teams</label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" name="responsibilities" value="analytics" id="resp-analytics">
+                                        <label class="form-check-label" for="resp-analytics">Analytics</label>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <button class="btn create-btn w-100" type="submit" id="assign-btn">
+                                <span id="assign-btn-text"><i class="fas fa-user-plus me-2"></i>Assign Coordinator</span>
+                                <span id="assign-btn-spinner" class="d-none"><i class="fas fa-circle-notch fa-spin me-2"></i>Assigning...</span>
+                            </button>
                         </form>
                     </div>
 

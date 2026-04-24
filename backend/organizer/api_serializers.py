@@ -58,7 +58,7 @@ class HackathonCoordinatorSerializer(serializers.ModelSerializer):
     
     class Meta:
         model = HackathonCoordinator
-        fields = ['id', 'user', 'user_email', 'hackathon', 'created_at']
+        fields = ['id', 'user', 'user_email', 'hackathon', 'responsibilities', 'created_at']
         read_only_fields = ('created_at', 'hackathon')
 
 

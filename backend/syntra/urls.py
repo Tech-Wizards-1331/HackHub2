@@ -28,6 +28,7 @@ urlpatterns = [
     path('organizer/', include('organizer.urls')),
     path('participant/', include('participant.urls')),
     path('volunteers/', include('volunteers.urls')),
+    path('coordinator/', include('coordinator.urls')),
     # Uncomment once social-auth-app-django is installed and configured:
     # path('auth/', include('social_django.urls', namespace='social')),
     path('', include('core.urls')),

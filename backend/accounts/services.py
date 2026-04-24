@@ -26,6 +26,8 @@ from judge.models import JudgeProfile
 from judge.forms import JudgeProfileForm
 from volunteers.models import VolunteerProfile
 from volunteers.forms import VolunteerProfileForm
+from coordinator.models import CoordinatorProfile
+from coordinator.forms import CoordinatorProfileForm
 
 logger = logging.getLogger(__name__)
 
@@ -69,6 +71,12 @@ ROLE_REGISTRY: dict[str, RoleProfileConfig] = {
         form=VolunteerProfileForm,
         related_name='volunteer_profile',
         dashboard_url='/volunteers/dashboard',
+    ),
+    User.Role.COORDINATOR: RoleProfileConfig(
+        model=CoordinatorProfile,
+        form=CoordinatorProfileForm,
+        related_name='coordinator_profile',
+        dashboard_url='/coordinator/',
     ),
 }
 

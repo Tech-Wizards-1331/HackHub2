@@ -23,7 +23,9 @@ from django.views.decorators.http import require_POST
 from allauth.socialaccount.adapter import get_adapter
 from allauth.socialaccount.models import SocialApp
 
-from .forms import LoginForm, ProfileCompletionForm, RoleSelectionForm, SignUpForm
+from .forms import LoginForm, ProfileCompletionForm, RoleSelectionForm, SignUpForm, AcceptInviteForm
+from django.contrib.auth.tokens import default_token_generator
+from django.utils.http import urlsafe_base64_decode
 from .models import User
 from .services import (
     get_dashboard_url,
@@ -141,6 +143,45 @@ def logout_view(request: HttpRequest) -> HttpResponse:
 # ──────────────────────────────────────────────────────────────────────────────
 # Onboarding Views
 # ──────────────────────────────────────────────────────────────────────────────
+
+@never_cache
+def accept_invite_view(request: HttpRequest, uidb64: str, token: str) -> HttpResponse:
+    """Handle accept invite logic with token verification."""
+    try:
+        uid = urlsafe_base64_decode(uidb64).decode()
+        user = User.objects.get(pk=uid)
+    except (TypeError, ValueError, OverflowError, User.DoesNotExist):
+        user = None
+
+    if user is None or not default_token_generator.check_token(user, token):
+        messages.error(request, 'The invite link is invalid or has expired.')
+        return redirect('login')
+
+    # If the user already has a usable password, they have already accepted the invite
+    if user.has_usable_password():
+        messages.info(request, 'You have already accepted your invitation. Please log in.')
+        return redirect('login')
+
+    form = AcceptInviteForm(request.POST or None, instance=user)
+    if request.method == 'POST' and form.is_valid():
+        user = form.save(commit=False)
+        user.set_password(form.cleaned_data['password1'])
+        user.save()
+        login(request, user, backend='django.contrib.auth.backends.ModelBackend')
+
+        # Coordinators have no extra profile fields — auto-complete their profile
+        if user.role == User.Role.COORDINATOR:
+            from coordinator.models import CoordinatorProfile
+            CoordinatorProfile.objects.get_or_create(user=user)
+            user.is_profile_complete = True
+            user.save(update_fields=['is_profile_complete', 'updated_at'])
+            messages.success(request, 'Account activated successfully. Welcome aboard!')
+            return redirect('/coordinator/')
+
+        messages.success(request, 'Account activated successfully. Please complete your profile.')
+        return redirect('complete_profile')
+
+    return render(request, 'accounts/accept_invite.html', {'form': form})
 
 @never_cache
 @login_required

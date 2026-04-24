@@ -22,6 +22,7 @@ class UserFlowMiddleware:
             request.path.startswith('/accounts/social/')
             or request.path.startswith('/accounts/google/')
             or request.path.startswith('/accounts/github/')
+            or request.path.startswith('/accounts/invite/')
         ):
             return self.get_response(request)
 

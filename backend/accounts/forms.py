@@ -85,3 +85,32 @@ class RoleSelectionForm(forms.Form):
         choices=ROLE_OPTIONS,
         widget=forms.Select(attrs={'class': INPUT_CLASS}),
     )
+
+class AcceptInviteForm(forms.ModelForm):
+    password1 = forms.CharField(
+        widget=forms.PasswordInput(
+            attrs={'class': INPUT_CLASS, 'placeholder': 'Create a strong password'}
+        ),
+        label='Password'
+    )
+    password2 = forms.CharField(
+        widget=forms.PasswordInput(
+            attrs={'class': INPUT_CLASS, 'placeholder': 'Re-enter your password'}
+        ),
+        label='Confirm Password'
+    )
+
+    class Meta:
+        model = User
+        fields = ['full_name']
+        widgets = {
+            'full_name': forms.TextInput(
+                attrs={'class': INPUT_CLASS, 'placeholder': 'Your full name'}
+            ),
+        }
+
+    def clean(self):
+        cleaned_data = super().clean()
+        if cleaned_data.get('password1') != cleaned_data.get('password2'):
+            self.add_error('password2', 'Passwords do not match.')
+        return cleaned_data

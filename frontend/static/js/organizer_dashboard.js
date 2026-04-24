@@ -196,7 +196,55 @@ function viewAnalytics()      { quickAction('analytics', 'GET'); }
 function notifyParticipants() { quickAction('notify_participants', 'POST'); }
 function generateResults()    { quickAction('generate_results', 'POST'); }
 
-/* ── Assign Coordinator ─────────────────────────────── */
+/* ── Coordinator Management (Manage Tab) ───────────── */
+document.getElementById('tab-coordinators-trigger').addEventListener('shown.bs.tab', function() {
+    if (currentManageId) fetchCoordinators(currentManageId);
+});
+
+async function fetchCoordinators(hackathonId) {
+    const listEl = document.getElementById('coordinator-list');
+    const loadingEl = document.getElementById('coord-list-loading');
+    const emptyEl = document.getElementById('coord-list-empty');
+
+    listEl.innerHTML = '';
+    loadingEl.style.display = 'block';
+    emptyEl.style.display = 'none';
+
+    const res = await apiRequest(`/api/organizer/hackathons/${hackathonId}/list_coordinators/`);
+    loadingEl.style.display = 'none';
+
+    if (!res) return;
+    const list = await res.json().catch(() => []);
+
+    if (!list.length) {
+        emptyEl.style.display = 'block';
+        return;
+    }
+
+    list.forEach(c => {
+        const item = document.createElement('div');
+        item.className = 'action-item p-3 mb-2 border rounded d-flex align-items-center justify-content-between';
+        
+        const resps = (c.responsibilities || []).map(r => {
+            return `<span class="badge bg-secondary me-1" style="font-size: 0.7rem">${r.replace('_', ' ')}</span>`;
+        }).join('');
+
+        item.innerHTML = `
+            <div class="d-flex align-items-center gap-3">
+                <div class="action-icon action-icon--blue"><i class="fas fa-user-shield"></i></div>
+                <div>
+                    <div class="action-title mb-1">${escapeHtml(c.user_email)}</div>
+                    <div class="d-flex flex-wrap">${resps || '<span class="text-muted small">No specific tasks</span>'}</div>
+                </div>
+            </div>
+            <button class="btn btn-link text-danger p-0 ms-2" onclick="unassignCoordinator('${hackathonId}', '${escapeHtml(c.user_email)}')">
+                <i class="fas fa-user-minus"></i>
+            </button>
+        `;
+        listEl.appendChild(item);
+    });
+}
+
 document.getElementById('assign-coordinator-form').addEventListener('submit', async function(e) {
     e.preventDefault();
     const btn   = document.getElementById('assign-btn');
@@ -209,10 +257,15 @@ document.getElementById('assign-coordinator-form').addEventListener('submit', as
 
     const email = this.elements['coordinator_email'].value;
     const id = document.getElementById('manage-hackathon-id').value;
+    
+    // Get checked responsibilities
+    const resps = Array.from(this.elements['responsibilities'])
+        .filter(cb => cb.checked)
+        .map(cb => cb.value);
 
     const res = await apiRequest(`/api/organizer/hackathons/${id}/assign_coordinator/`, {
         method: 'POST',
-        body: JSON.stringify({ email })
+        body: JSON.stringify({ email, responsibilities: resps })
     });
 
     btext.classList.remove('d-none');
@@ -226,11 +279,31 @@ document.getElementById('assign-coordinator-form').addEventListener('submit', as
         showAlert('coordinator-api-message', data.message || 'Coordinator assigned.', false);
         toast('Coordinator assigned successfully!', 'success');
         this.reset();
+        fetchCoordinators(id);
     } else {
         const msg = data.error || data.email?.[0] || data.detail || 'Failed to assign.';
         showAlert('coordinator-api-message', msg, true);
     }
 });
+
+async function unassignCoordinator(hackathonId, email) {
+    if (!confirm(`Are you sure you want to unassign ${email}?`)) return;
+    
+    const res = await apiRequest(`/api/organizer/hackathons/${hackathonId}/unassign_coordinator/`, {
+        method: 'POST',
+        body: JSON.stringify({ email })
+    });
+    
+    if (!res) return;
+    const data = await res.json().catch(() => ({}));
+    
+    if (res.ok) {
+        toast('Coordinator unassigned.', 'success');
+        fetchCoordinators(hackathonId);
+    } else {
+        toast(data.error || 'Unassignment failed.', 'error');
+    }
+}
 
 /* ── Problem Statements (Manage Tab) ───────────────── */
 

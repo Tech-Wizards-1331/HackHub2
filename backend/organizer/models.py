@@ -86,8 +86,18 @@ class Hackathon(models.Model):
 
 
 class HackathonCoordinator(models.Model):
+    class Responsibility(models.TextChoices):
+        PROBLEM_STATEMENTS = 'PROBLEM_STATEMENTS', 'Problem Statements'
+        ANALYTICS = 'ANALYTICS', 'Analytics'
+        TEAM_MANAGEMENT = 'TEAM_MANAGEMENT', 'Team Management'
+
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='coordinated_hackathons')
     hackathon = models.ForeignKey(Hackathon, on_delete=models.CASCADE, related_name='coordinators')
+    responsibilities = models.JSONField(
+        default=list,
+        blank=True,
+        help_text='List of Responsibility enum values, e.g. ["PROBLEM_STATEMENTS", "ANALYTICS"]'
+    )
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
