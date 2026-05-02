@@ -1,5 +1,6 @@
 from django.db import models
 from django.conf import settings
+from django.core.validators import FileExtensionValidator
 
 
 class OrganizerProfile(models.Model):
@@ -33,9 +34,38 @@ class Hackathon(models.Model):
     status = models.CharField(max_length=30, choices=STATUS_CHOICES, default='registration_open')
     min_team_size = models.PositiveIntegerField(default=1)
     max_team_size = models.PositiveIntegerField(default=4)
+    room_configuration = models.JSONField(null=True, blank=True)
+    seating_allocation = models.JSONField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
         return self.name
 
+
+class ProblemStatement(models.Model):
+    hackathon = models.ForeignKey(
+        Hackathon,
+        on_delete=models.CASCADE,
+        related_name='problem_statements',
+    )
+    title = models.CharField(max_length=255)
+    description = models.TextField(blank=True)
+    pdf_file = models.FileField(
+        upload_to='problem_statements/',
+        blank=True,
+        null=True,
+        validators=[FileExtensionValidator(allowed_extensions=['pdf'])],
+    )
+    max_teams_allowed = models.PositiveIntegerField(
+        help_text="Maximum number of teams that can select this problem statement.",
+    )
+    is_active = models.BooleanField(default=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f"{self.title} — {self.hackathon.name}"
