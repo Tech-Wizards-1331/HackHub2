@@ -27,6 +27,7 @@ urlpatterns = [
     path('api/organizer/', include('organizer.api_urls')),
     path('api/participant/', include('participant.api_urls')),
     path('accounts/', include('accounts.urls')),
+    path('organizer/', include('organizer.urls')),
     # Public landing page
     path('', TemplateView.as_view(template_name='home.html'), name='home'),
     # Authenticated dashboard
