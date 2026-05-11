@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add Problem Statement - Syntra</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f4f7f6;
+            color: #333;
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            max-width: 700px;
+            margin: 50px auto;
+            padding: 30px;
+            background: #fff;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        header {
+            border-bottom: 1px solid #eaeaea;
+            padding-bottom: 10px;
+            margin-bottom: 25px;
+        }
+        h1 { margin: 0; color: #2c3e50; }
+        .subtitle { color: #7f8c8d; margin-top: 4px; }
+        .form-group { margin-bottom: 18px; }
+        .form-group label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 6px;
+            color: #2c3e50;
+        }
+        .form-input {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            font-size: 1em;
+            font-family: inherit;
+            box-sizing: border-box;
+            transition: border-color 0.2s;
+        }
+        .form-input:focus {
+            outline: none;
+            border-color: #2980b9;
+            box-shadow: 0 0 0 2px rgba(41, 128, 185, 0.2);
+        }
+        .form-checkbox { width: auto; margin-right: 8px; }
+        .form-errors { color: #e74c3c; font-size: 0.9em; margin-top: 4px; }
+        .form-errors ul { margin: 0; padding-left: 18px; }
+        .non-field-errors {
+            background: #fdecea;
+            border: 1px solid #e74c3c;
+            color: #c0392b;
+            padding: 10px 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+        .btn {
+            display: inline-block;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 5px;
+            font-size: 1em;
+            font-weight: 600;
+            cursor: pointer;
+            text-decoration: none;
+            transition: background-color 0.2s;
+        }
+        .btn-primary { background: #2980b9; color: #fff; }
+        .btn-primary:hover { background: #2471a3; }
+        .btn-secondary { background: #ecf0f1; color: #2c3e50; }
+        .btn-secondary:hover { background: #d5dbdb; }
+        .form-actions {
+            display: flex;
+            gap: 12px;
+            margin-top: 25px;
+            padding-top: 20px;
+            border-top: 1px solid #eaeaea;
+        }
+        .checkbox-row {
+            display: flex;
+            align-items: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Add Problem Statement</h1>
+            <p class="subtitle">For: {{ hackathon.name }}</p>
+        </header>
+
+        {% if form.non_field_errors %}
+            <div class="non-field-errors">{{ form.non_field_errors }}</div>
+        {% endif %}
+
+        <form method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+
+            <div class="form-group">
+                <label for="{{ form.title.id_for_label }}">Title *</label>
+                {{ form.title }}
+                {% if form.title.errors %}<div class="form-errors">{{ form.title.errors }}</div>{% endif %}
+            </div>
+
+            <div class="form-group">
+                <label for="{{ form.description.id_for_label }}">Description</label>
+                {{ form.description }}
+                {% if form.description.errors %}<div class="form-errors">{{ form.description.errors }}</div>{% endif %}
+            </div>
+
+            <div class="form-group">
+                <label for="{{ form.pdf_file.id_for_label }}">PDF File (optional)</label>
+                {{ form.pdf_file }}
+                {% if form.pdf_file.errors %}<div class="form-errors">{{ form.pdf_file.errors }}</div>{% endif %}
+            </div>
+
+            <div class="form-group">
+                <label for="{{ form.max_teams_allowed.id_for_label }}">Max Teams Allowed *</label>
+                {{ form.max_teams_allowed }}
+                {% if form.max_teams_allowed.errors %}<div class="form-errors">{{ form.max_teams_allowed.errors }}</div>{% endif %}
+            </div>
+
+            <div class="form-group">
+                <div class="checkbox-row">
+                    {{ form.is_active }}
+                    <label for="{{ form.is_active.id_for_label }}">Active</label>
+                </div>
+                {% if form.is_active.errors %}<div class="form-errors">{{ form.is_active.errors }}</div>{% endif %}
+            </div>
+
+            <div class="form-actions">
+                <button type="submit" class="btn btn-primary">Add Problem Statement</button>
+                <a href="{% url 'organizer-hackathon-detail' hackathon.pk %}" class="btn btn-secondary">Cancel</a>
+            </div>
+        </form>
+    </div>
+</body>
+</html>
