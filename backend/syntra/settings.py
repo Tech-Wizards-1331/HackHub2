@@ -83,8 +83,6 @@ INSTALLED_APPS = [
     'allauth.socialaccount.providers.github',
     'django_celery_beat',
     'accounts',
-    'organizer',
-    'participant',
 ]
 
 AUTH_USER_MODEL = 'accounts.User'
@@ -146,7 +144,6 @@ SOCIALACCOUNT_PROVIDERS = {
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework_simplejwt.authentication.JWTAuthentication',
-        'rest_framework.authentication.SessionAuthentication',
     ),
     'DEFAULT_PERMISSION_CLASSES': (
         'rest_framework.permissions.IsAuthenticated',
@@ -209,30 +206,6 @@ else:
         'default': {
             'ENGINE': 'django.db.backends.sqlite3',
             'NAME': BASE_DIR / 'db.sqlite3',
-        }
-    }
-
-# ── Caching ──────────────────────────────────────────────────────────────────
-# Uses REDIS_URL in production (Render Redis, Upstash, etc.).
-# Falls back to in-memory cache for local development if Redis is not available.
-_redis_url = os.getenv('REDIS_URL', '')
-if _redis_url:
-    CACHES = {
-        'default': {
-            'BACKEND': 'django_redis.cache.RedisCache',
-            'LOCATION': _redis_url,
-            'OPTIONS': {
-                'CLIENT_CLASS': 'django_redis.client.DefaultClient',
-            },
-            'TIMEOUT': 3600,  # 1 hour default TTL
-        }
-    }
-else:
-    CACHES = {
-        'default': {
-            'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
-            'LOCATION': 'syntra-cache',
-            'TIMEOUT': 3600,
         }
     }
 
