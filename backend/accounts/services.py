@@ -35,8 +35,6 @@ def get_github_profile_url(user: User) -> str:
 
 def resolve_post_login_destination(user: User) -> str:
     """Determine where to send a user after login/signup.
-    Routes to profile completion if incomplete, otherwise to dashboard.
+    Since we only have auth, just send them to a simple home or dashboard.
     """
-    if not user.is_profile_complete:
-        return '/accounts/complete-profile/'
-    return '/dashboard/'
+    return '/'

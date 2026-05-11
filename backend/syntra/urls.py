@@ -24,13 +24,9 @@ from django.views.generic import TemplateView
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/auth/', include('accounts.api_urls')),
-    path('api/organizer/', include('organizer.api_urls')),
-    path('api/participant/', include('participant.api_urls')),
     path('accounts/', include('accounts.urls')),
-    # Public landing page
-    path('', TemplateView.as_view(template_name='home.html'), name='home'),
-    # Authenticated dashboard
-    path('dashboard/', login_required(TemplateView.as_view(template_name='accounts/dashboard.html')), name='dashboard'),
+    # Render a basic authenticated dashboard at the root
+    path('', login_required(TemplateView.as_view(template_name='accounts/dashboard.html')), name='home'),
 ]
 
 # Serve uploaded media files during development
