@@ -53,12 +53,17 @@ function handleLoginSuccess(payload, nextUrl) {
         return;
     }
 
+    if (!user.role) {
+        window.location.href = '/accounts/select-role/';
+        return;
+    }
+
     if (!user.is_profile_complete) {
         window.location.href = '/accounts/complete-profile/';
         return;
     }
 
-    window.location.href = '/dashboard/';
+    window.location.href = '/accounts/social-redirect/';
 }
 
 async function submitAuthForm(form, isSignup) {
@@ -96,8 +101,8 @@ async function submitAuthForm(form, isSignup) {
     storeTokens(payload);
 
     if (isSignup) {
-        showApiMessage('Account created. Redirecting to complete profile...', false);
-        window.location.href = '/accounts/complete-profile/';
+        showApiMessage('Account created. Please complete your role selection.', false);
+        window.location.href = '/accounts/select-role/';
         return;
     }
 
