@@ -1,0 +1,52 @@
+# ── Python ──
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+# ── Virtual Environment ──
+.venv/
+venv/
+env/
+
+# ── Environment Variables ──
+.env
+.env.*
+!.env.example
+
+# ── Django ──
+*.log
+db.sqlite3
+db.sqlite3-journal
+/backend/staticfiles/
+/backend/media/
+
+# ── IDE / Editor ──
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+
+# ── Distribution / Packaging ──
+dist/
+build/
+*.egg-info/
+*.egg
+
+# ── Testing / Coverage ──
+htmlcov/
+.coverage
+.coverage.*
+.pytest_cache/
+.tox/
+
+# ── Node (frontend) ──
+node_modules/
+npm-debug.log*
+
+# ── OS ──
+.DS_Store
+Desktop.ini
