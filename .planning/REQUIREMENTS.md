@@ -23,6 +23,7 @@
 - [ ] **HACK-01**: Organizer can create a Hackathon event with basic details (Name, Date, Description).
 - [ ] **HACK-02**: Organizer can define phases for a hackathon (e.g., Registration, Team Building, Active).
 - [ ] **HACK-03**: Only one phase can be "Active" at a time per hackathon.
+- [x] **HACK-04**: Organizer can create, view, update, and delete Problem Statements for a hackathon, with optional PDF uploads and an active/inactive toggle.
 
 ### Team Management
 
@@ -68,6 +69,7 @@
 | PROF-02 | Phase 1 | Pending |
 | HACK-01 | Phase 2 | Pending |
 | HACK-02 | Phase 2 | Pending |
+| HACK-04 | Phase 1 | Done |
 | TEAM-01 | Phase 3 | Pending |
 | TEAM-02 | Phase 3 | Pending |
 | TEAM-03 | Phase 3 | Pending |

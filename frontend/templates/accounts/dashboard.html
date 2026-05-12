@@ -1,24 +1,99 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard</title>
+    <title>Syntra | Dashboard</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Orbitron:wght@500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .font-tech { font-family: 'Orbitron', sans-serif; }
+    </style>
 </head>
-<body class="bg-slate-950 text-slate-200 min-h-screen flex items-center justify-center">
-    <div class="max-w-md w-full bg-slate-900 border border-slate-800 rounded-xl p-8 shadow-2xl text-center">
-        <h1 class="text-3xl font-bold mb-4 bg-clip-text text-transparent bg-gradient-to-r from-cyan-400 to-blue-500">
-            Welcome, {{ user.full_name|default:user.email }}!
-        </h1>
-        <p class="text-slate-400 mb-8">You have successfully authenticated.</p>
-        
-        <form action="{% url 'logout' %}" method="post">
-            {% csrf_token %}
-            <button type="submit" class="w-full rounded-lg bg-red-500/10 border border-red-500/50 py-3 text-sm font-semibold text-red-500 hover:bg-red-500 hover:text-white transition-all duration-300">
-                Log Out
-            </button>
-        </form>
-    </div>
+<body class="bg-slate-950 text-slate-200 min-h-screen">
+
+    <!-- Nav -->
+    <nav class="border-b border-slate-800 bg-slate-950/80 backdrop-blur-lg sticky top-0 z-50">
+        <div class="max-w-6xl mx-auto flex items-center justify-between h-16 px-4 sm:px-6">
+            <a href="{% url 'home' %}" class="flex items-center gap-2">
+                <span class="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-teal-300/40 bg-teal-400/15 text-xs font-bold text-teal-200">HH</span>
+                <span class="font-tech text-sm tracking-[0.18em] text-white">Syntra</span>
+            </a>
+            <div class="flex items-center gap-4">
+                <span class="text-sm text-slate-400">{{ user.email }}</span>
+                <form action="{% url 'logout' %}" method="post">
+                    {% csrf_token %}
+                    <button type="submit" class="rounded-lg border border-red-500/40 bg-red-500/10 px-4 py-2 text-sm font-medium text-red-400 hover:bg-red-500 hover:text-white transition-all">
+                        Log Out
+                    </button>
+                </form>
+            </div>
+        </div>
+    </nav>
+
+    <main class="max-w-6xl mx-auto px-4 sm:px-6 py-10">
+        <!-- Welcome -->
+        <div class="mb-10">
+            <h1 class="text-3xl font-bold text-white">
+                Welcome, {{ user.full_name|default:user.email }}!
+            </h1>
+            <p class="mt-2 text-slate-400">
+                Role: <span class="inline-flex items-center rounded-full border border-teal-300/35 bg-teal-400/10 px-3 py-0.5 text-xs font-medium text-teal-200 capitalize">{{ user.role|default:"participant" }}</span>
+            </p>
+        </div>
+
+        <!-- Quick Actions -->
+        <div class="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+
+            {% if user.role == 'organizer' %}
+            <a href="{% url 'organizer-dashboard' %}" class="group block rounded-2xl border border-slate-700/60 bg-slate-900/60 p-6 hover:border-teal-400/50 hover:bg-slate-800/60 transition-all">
+                <div class="mb-4 inline-flex h-12 w-12 items-center justify-center rounded-xl bg-teal-500/10 text-teal-400 border border-teal-500/20 group-hover:scale-110 transition-transform">
+                    <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/></svg>
+                </div>
+                <h3 class="text-base font-bold text-white">Organizer Dashboard</h3>
+                <p class="mt-1 text-sm text-slate-400">Manage your hackathons, problem statements, and seating.</p>
+            </a>
+
+            <a href="{% url 'organizer-create-hackathon' %}" class="group block rounded-2xl border border-slate-700/60 bg-slate-900/60 p-6 hover:border-yellow-400/50 hover:bg-slate-800/60 transition-all">
+                <div class="mb-4 inline-flex h-12 w-12 items-center justify-center rounded-xl bg-yellow-500/10 text-yellow-400 border border-yellow-500/20 group-hover:scale-110 transition-transform">
+                    <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 4v16m8-8H4"/></svg>
+                </div>
+                <h3 class="text-base font-bold text-white">Create Hackathon</h3>
+                <p class="mt-1 text-sm text-slate-400">Set up a new hackathon event from scratch.</p>
+            </a>
+            {% endif %}
+
+            {% if user.role == 'participant' %}
+            <a href="{% url 'complete_profile' %}" class="group block rounded-2xl border border-slate-700/60 bg-slate-900/60 p-6 hover:border-teal-400/50 hover:bg-slate-800/60 transition-all">
+                <div class="mb-4 inline-flex h-12 w-12 items-center justify-center rounded-xl bg-teal-500/10 text-teal-400 border border-teal-500/20 group-hover:scale-110 transition-transform">
+                    <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
+                </div>
+                <h3 class="text-base font-bold text-white">My Profile</h3>
+                <p class="mt-1 text-sm text-slate-400">Update your profile, skills, and preferences.</p>
+            </a>
+            {% endif %}
+
+            <a href="{% url 'home' %}" class="group block rounded-2xl border border-slate-700/60 bg-slate-900/60 p-6 hover:border-rose-400/50 hover:bg-slate-800/60 transition-all">
+                <div class="mb-4 inline-flex h-12 w-12 items-center justify-center rounded-xl bg-rose-500/10 text-rose-400 border border-rose-500/20 group-hover:scale-110 transition-transform">
+                    <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
+                </div>
+                <h3 class="text-base font-bold text-white">Home</h3>
+                <p class="mt-1 text-sm text-slate-400">Go back to the landing page.</p>
+            </a>
+
+            <a href="{% url 'login' %}" class="group block rounded-2xl border border-slate-700/60 bg-slate-900/60 p-6 hover:border-indigo-400/50 hover:bg-slate-800/60 transition-all">
+                <div class="mb-4 inline-flex h-12 w-12 items-center justify-center rounded-xl bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 group-hover:scale-110 transition-transform">
+                    <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"/></svg>
+                </div>
+                <h3 class="text-base font-bold text-white">Admin Panel</h3>
+                <p class="mt-1 text-sm text-slate-400">Access the Django admin interface.</p>
+            </a>
+        </div>
+    </main>
+
 </body>
 </html>
