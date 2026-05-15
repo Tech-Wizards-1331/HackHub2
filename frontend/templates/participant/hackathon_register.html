@@ -17,15 +17,15 @@
     <!-- Top Navigation -->
     <nav class="sticky top-0 z-50 border-b border-slate-800/60 bg-slate-950/80 backdrop-blur-md">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex justify-between h-16 items-center">
-                <div class="flex items-center gap-3">
-                    <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-teal-400 to-emerald-600 flex items-center justify-center shadow-lg shadow-teal-500/20">
-                        <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+            <div class="flex justify-between h-14 sm:h-16 items-center">
+                <div class="flex items-center gap-2 sm:gap-3 shrink-0">
+                    <div class="w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-gradient-to-br from-teal-400 to-emerald-600 flex items-center justify-center shadow-lg shadow-teal-500/20">
+                        <svg class="w-4 h-4 sm:w-5 sm:h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
                     </div>
-                    <span class="font-tech font-bold text-xl tracking-tight text-white">SYNTRA</span>
+                    <span class="font-tech font-bold text-base sm:text-xl tracking-tight text-white">SYNTRA</span>
                 </div>
-                <div class="flex items-center gap-4">
-                    <a href="{% url 'hackathon-list' %}" class="text-sm font-medium text-slate-400 hover:text-teal-400 transition-colors">Back to List</a>
+                <div class="flex items-center gap-3 sm:gap-4">
+                    <a href="{% url 'hackathon-list' %}" class="hidden sm:block text-sm font-medium text-slate-400 hover:text-teal-400 transition-colors">Back to List</a>
                     <a href="{% url 'dashboard' %}" class="text-sm font-medium text-slate-400 hover:text-teal-400 transition-colors">Dashboard</a>
                 </div>
             </div>
@@ -33,11 +33,11 @@
     </nav>
 
     <!-- Main Content -->
-    <main class="flex-grow max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-10 w-full relative z-10">
+    <main class="flex-grow max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-10 w-full relative z-10">
         
-        <div class="mb-8 border-b border-slate-800/60 pb-6">
-            <h1 class="text-3xl md:text-4xl font-bold text-white tracking-tight mb-2">Register for {{ hackathon.name }}</h1>
-            <p class="text-slate-400">Complete the wizard below to form your team and join the hackathon. Required size: {{ hackathon.min_team_size }} - {{ hackathon.max_team_size }} members.</p>
+        <div class="mb-6 sm:mb-8 border-b border-slate-800/60 pb-5 sm:pb-6">
+            <h1 class="text-2xl sm:text-3xl md:text-4xl font-bold text-white tracking-tight mb-2 leading-tight">Register for {{ hackathon.name }}</h1>
+            <p class="text-sm sm:text-base text-slate-400">Complete the wizard below to form your team and join the hackathon. Required size: {{ hackathon.min_team_size }} - {{ hackathon.max_team_size }} members.</p>
         </div>
 
         {% if messages %}
@@ -72,10 +72,10 @@
 
             {% if team %}
             <!-- Step 2: Add Members -->
-            <div class="bg-slate-900/60 border border-slate-700/60 rounded-2xl p-6 backdrop-blur-md">
-                <div class="flex justify-between items-center mb-4">
-                    <h3 class="text-xl font-bold text-white">2. Team Members</h3>
-                    <span class="text-sm px-2.5 py-1 rounded-md bg-slate-800 text-slate-300 border border-slate-700">
+            <div class="bg-slate-900/60 border border-slate-700/60 rounded-2xl p-4 sm:p-6 backdrop-blur-md">
+                <div class="flex justify-between items-center mb-4 gap-3">
+                    <h3 class="text-lg sm:text-xl font-bold text-white">2. Team Members</h3>
+                    <span class="shrink-0 text-sm px-2.5 py-1 rounded-md bg-slate-800 text-slate-300 border border-slate-700">
                         {{ team.members.count|add:"1" }} / {{ hackathon.max_team_size }}
                     </span>
                 </div>
@@ -121,7 +121,7 @@
                     <h4 class="text-md font-semibold text-slate-200 mb-4">Add Guest Teammate</h4>
                     <form method="POST" action="{% url 'hackathon-register' pk=hackathon.pk %}">
                         {% csrf_token %}
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 mb-4">
                             <div>
                                 <label class="block text-sm font-medium text-slate-300 mb-1">Name</label>
                                 {{ member_form.name }}
@@ -158,13 +158,13 @@
             </div>
 
             <!-- Step 3: Complete -->
-            <div class="flex justify-end pt-6 gap-4">
-                <a href="{% url 'dashboard' %}" class="px-8 py-3 border border-slate-700 hover:border-slate-500 hover:bg-slate-800 text-slate-300 font-bold rounded-xl transition-all flex items-center">
-                    Save Draft & Exit
+            <div class="flex flex-col-reverse sm:flex-row sm:justify-end pt-6 gap-3 sm:gap-4">
+                <a href="{% url 'dashboard' %}" class="flex items-center justify-center px-6 py-3 border border-slate-700 hover:border-slate-500 hover:bg-slate-800 text-slate-300 font-bold rounded-xl transition-all text-sm sm:text-base">
+                    Save Draft &amp; Exit
                 </a>
-                <form method="POST" action="{% url 'hackathon-register' pk=hackathon.pk %}">
+                <form method="POST" action="{% url 'hackathon-register' pk=hackathon.pk %}" class="w-full sm:w-auto">
                     {% csrf_token %}
-                    <button type="submit" name="complete_registration" class="px-8 py-3 bg-teal-500 hover:bg-teal-400 text-slate-950 font-bold rounded-xl shadow-lg shadow-teal-500/20 transition-all hover:scale-[1.02]">
+                    <button type="submit" name="complete_registration" class="w-full sm:w-auto flex items-center justify-center px-6 sm:px-8 py-3 bg-teal-500 hover:bg-teal-400 text-slate-950 font-bold rounded-xl shadow-lg shadow-teal-500/20 transition-all hover:scale-[1.02] text-sm sm:text-base">
                         Complete Registration
                     </button>
                 </form>

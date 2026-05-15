@@ -24,30 +24,35 @@
         .pulse-dot { animation:pulseDot 2s ease-in-out infinite; }
         @keyframes pulseDot { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.7;transform:scale(1.15)} }
         /* toast */
-        #toast { position:fixed; bottom:1.5rem; left:50%; transform:translateX(-50%) translateY(80px); transition:transform .35s cubic-bezier(.4,0,.2,1),opacity .35s; opacity:0; z-index:9999; pointer-events:none; }
+        #toast { position:fixed; bottom:1.5rem; left:50%; transform:translateX(-50%) translateY(80px); transition:transform .35s cubic-bezier(.4,0,.2,1),opacity .35s; opacity:0; z-index:9999; pointer-events:none; width:calc(100% - 2rem); max-width:420px; }
         #toast.show { transform:translateX(-50%) translateY(0); opacity:1; }
         /* PS detail modal */
-        #ps-modal { position:fixed; inset:0; z-index:999; display:flex; align-items:center; justify-content:center; padding:1rem; opacity:0; pointer-events:none; transition:opacity .25s ease; }
+        #ps-modal { position:fixed; inset:0; z-index:999; display:flex; align-items:flex-end; justify-content:center; padding:0; opacity:0; pointer-events:none; transition:opacity .25s ease; }
+        @media (min-width:640px) { #ps-modal { align-items:center; padding:1rem; } }
         #ps-modal.open { opacity:1; pointer-events:auto; }
         #ps-modal-backdrop { position:absolute; inset:0; background:rgba(2,6,23,.85); backdrop-filter:blur(6px); }
-        #ps-modal-box { position:relative; width:100%; max-width:620px; background:linear-gradient(160deg,rgba(17,27,46,.95),rgba(11,18,32,.98)); border:1px solid rgba(148,163,184,.2); border-radius:1.5rem; box-shadow:0 30px 80px rgba(2,6,23,.7); transform:translateY(24px) scale(.97); transition:transform .3s cubic-bezier(.4,0,.2,1); max-height:90vh; overflow-y:auto; }
+        #ps-modal-box { position:relative; width:100%; max-width:620px; background:linear-gradient(160deg,rgba(17,27,46,.95),rgba(11,18,32,.98)); border:1px solid rgba(148,163,184,.2); border-radius:1.5rem 1.5rem 0 0; box-shadow:0 30px 80px rgba(2,6,23,.7); transform:translateY(40px) scale(.99); transition:transform .3s cubic-bezier(.4,0,.2,1); max-height:92vh; overflow-y:auto; }
+        @media (min-width:640px) { #ps-modal-box { border-radius:1.5rem; transform:translateY(24px) scale(.97); max-height:90vh; } }
         #ps-modal.open #ps-modal-box { transform:translateY(0) scale(1); }
+        /* touch friendliness */
+        button, a { -webkit-tap-highlight-color:transparent; }
+        .touch-min { min-height:44px; }
     </style>
 </head>
 <body class="bg-slate-950 text-slate-200 min-h-screen">
 
 <!-- Nav -->
 <nav class="border-b border-slate-800 bg-slate-950/80 backdrop-blur-lg sticky top-0 z-50">
-    <div class="max-w-5xl mx-auto flex items-center justify-between h-16 px-4 sm:px-6">
-        <a href="{% url 'dashboard' %}" class="flex items-center gap-2">
+    <div class="max-w-5xl mx-auto flex items-center justify-between h-14 sm:h-16 px-4 sm:px-6">
+        <a href="{% url 'dashboard' %}" class="flex items-center gap-2 shrink-0">
             <span class="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-teal-300/40 bg-teal-400/15 text-xs font-bold text-teal-200">S</span>
             <span class="font-tech text-sm tracking-[.18em] text-white">Syntra</span>
         </a>
-        <div class="flex items-center gap-3">
-            <span class="text-xs text-slate-400 hidden sm:block">{{ user.email }}</span>
-            <a href="{% url 'dashboard' %}" class="inline-flex items-center gap-1.5 rounded-lg border border-slate-600/60 bg-slate-900/40 px-3 py-2 text-sm font-medium text-slate-300 hover:border-teal-400/50 hover:text-teal-300 transition-all">
+        <div class="flex items-center gap-2 sm:gap-3 min-w-0">
+            <span class="text-xs text-slate-400 hidden sm:block truncate max-w-[160px]">{{ user.email }}</span>
+            <a href="{% url 'dashboard' %}" class="touch-min inline-flex items-center gap-1.5 rounded-lg border border-slate-600/60 bg-slate-900/40 px-3 py-2 text-sm font-medium text-slate-300 hover:border-teal-400/50 hover:text-teal-300 transition-all shrink-0">
                 <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
-                Dashboard
+                <span class="hidden xs:inline sm:inline">Dashboard</span>
             </a>
         </div>
     </div>
@@ -58,7 +63,7 @@
     <div id="toast-inner" class="rounded-xl border px-5 py-3 text-sm font-semibold shadow-xl"></div>
 </div>
 
-<main class="max-w-5xl mx-auto px-4 sm:px-6 py-10 space-y-6">
+<main class="max-w-5xl mx-auto px-4 sm:px-6 py-6 sm:py-10 space-y-4 sm:space-y-6">
 
     <!-- Messages -->
     {% if messages %}
@@ -111,13 +116,13 @@
     </div>
 
     <!-- ── MY TEAM ── -->
-    <div class="glass rounded-2xl p-6 sm:p-8 anim anim1">
-        <div class="flex items-center justify-between mb-5">
-            <div>
+    <div class="glass rounded-2xl p-4 sm:p-6 lg:p-8 anim anim1">
+        <div class="flex items-start sm:items-center justify-between mb-4 sm:mb-5 gap-3">
+            <div class="min-w-0">
                 <p class="text-xs uppercase tracking-[.18em] text-indigo-300 font-tech mb-0.5">Your Team</p>
-                <h2 class="text-xl font-bold text-white">{{ team.name }}</h2>
+                <h2 class="text-lg sm:text-xl font-bold text-white truncate">{{ team.name }}</h2>
             </div>
-            <span class="inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-xs font-medium
+            <span class="shrink-0 inline-flex items-center gap-1.5 rounded-full border px-2.5 sm:px-3 py-1 text-xs font-medium
                 {% if team.is_registered %}border-emerald-300/35 bg-emerald-400/10 text-emerald-200{% else %}border-amber-300/35 bg-amber-400/10 text-amber-200{% endif %}">
                 <span class="h-1.5 w-1.5 rounded-full {% if team.is_registered %}bg-emerald-400{% else %}bg-amber-400{% endif %}"></span>
                 {% if team.is_registered %}Registered{% else %}Draft{% endif %}
@@ -140,9 +145,9 @@
         {% if members %}
         <div class="space-y-2">
             {% for m in members %}
-            <div class="flex items-center gap-3 rounded-xl border border-slate-700/30 bg-slate-800/20 px-4 py-2.5">
-                <span class="inline-flex h-7 w-7 items-center justify-center rounded-full bg-slate-700/60 text-slate-300 text-xs font-bold">{{ forloop.counter }}</span>
-                <div class="min-w-0">
+            <div class="flex items-center gap-3 rounded-xl border border-slate-700/30 bg-slate-800/20 px-3 sm:px-4 py-2.5">
+                <span class="shrink-0 inline-flex h-7 w-7 items-center justify-center rounded-full bg-slate-700/60 text-slate-300 text-xs font-bold">{{ forloop.counter }}</span>
+                <div class="min-w-0 flex-1">
                     <p class="text-sm font-medium text-slate-200 truncate">{{ m.name }}</p>
                     <p class="text-xs text-slate-500 truncate">{{ m.email }}{% if m.college %} &middot; {{ m.college }}{% endif %}</p>
                 </div>
@@ -155,7 +160,7 @@
     </div>
 
     <!-- ── PROBLEM STATEMENT SELECTION ── -->
-    <div class="glass rounded-2xl p-6 sm:p-8 anim anim2">
+    <div class="glass rounded-2xl p-4 sm:p-6 lg:p-8 anim anim2">
         <div class="flex items-center justify-between mb-6">
             <div>
                 <p class="text-xs uppercase tracking-[.18em] text-rose-300 font-tech mb-0.5">Problem Selection</p>
@@ -287,7 +292,7 @@
     </div>
 
     <!-- ── SEATING ALLOCATION ── -->
-    <div class="glass rounded-2xl p-6 sm:p-8 anim anim3">
+    <div class="glass rounded-2xl p-4 sm:p-6 lg:p-8 anim anim3">
         <div class="mb-5">
             <p class="text-xs uppercase tracking-[.18em] text-yellow-300 font-tech mb-0.5">Seating</p>
             <h2 class="text-xl font-bold text-white">Your Seat Assignment</h2>
@@ -347,17 +352,17 @@
         <!-- Top accent bar -->
         <div class="h-[3px] bg-gradient-to-r from-rose-400 via-indigo-400 to-teal-400 rounded-t-2xl"></div>
         <!-- Header -->
-        <div class="flex items-start justify-between gap-4 px-6 pt-6 pb-4">
+        <div class="flex items-start justify-between gap-3 px-4 sm:px-6 pt-5 sm:pt-6 pb-4">
             <div class="flex-1 min-w-0">
                 <p class="text-xs uppercase tracking-[.18em] text-rose-300 font-tech mb-1">Problem Statement</p>
-                <h2 id="modal-title" class="text-xl font-extrabold text-white leading-snug" id="modal-ps-title">—</h2>
+                <h2 id="modal-title" class="text-lg sm:text-xl font-extrabold text-white leading-snug">—</h2>
             </div>
-            <button onclick="closeModal()" class="shrink-0 inline-flex h-8 w-8 items-center justify-center rounded-xl border border-slate-700/50 bg-slate-800/60 text-slate-400 hover:text-white hover:border-slate-500 transition-all">
+            <button onclick="closeModal()" class="touch-min shrink-0 inline-flex h-9 w-9 items-center justify-center rounded-xl border border-slate-700/50 bg-slate-800/60 text-slate-400 hover:text-white hover:border-slate-500 transition-all">
                 <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
             </button>
         </div>
         <!-- Body -->
-        <div class="px-6 pb-6 space-y-5">
+        <div class="px-4 sm:px-6 pb-5 sm:pb-6 space-y-4 sm:space-y-5">
             <!-- Description -->
             <div id="modal-desc-wrap">
                 <p class="text-xs uppercase tracking-widest text-slate-500 font-semibold mb-2">Description</p>
@@ -387,7 +392,7 @@
             <!-- Action -->
             <div id="modal-action-wrap" class="pt-1 border-t border-slate-700/40">
                 <button id="modal-select-btn"
-                    class="w-full inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-teal-500 to-teal-600 px-5 py-3 text-sm font-bold text-white shadow-lg shadow-teal-500/20 hover:from-teal-400 hover:to-teal-500 transition-all disabled:opacity-50 disabled:cursor-not-allowed">
+                    class="touch-min w-full inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-teal-500 to-teal-600 px-5 py-3.5 text-sm font-bold text-white shadow-lg shadow-teal-500/20 hover:from-teal-400 hover:to-teal-500 transition-all disabled:opacity-50 disabled:cursor-not-allowed">
                     <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
                     Select This Problem Statement
                 </button>

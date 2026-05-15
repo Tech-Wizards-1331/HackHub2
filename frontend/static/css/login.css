@@ -35,7 +35,7 @@ body {
         #020617;
     color: var(--text);
     overflow-x: hidden;
-    padding: 20px 0;
+    padding: 16px;
 }
 
 .grid-bg {
@@ -66,7 +66,7 @@ a:hover { color: #5eead4; }
 /* ---------------- Container ---------------- */
 .auth-container {
     width: 820px;
-    max-width: 95vw;
+    max-width: 100%;
     position: relative;
     z-index: 1;
     border-radius: 24px;
@@ -205,7 +205,7 @@ a:hover { color: #5eead4; }
 
 /* ---------------- OAuth Buttons ---------------- */
 .oauth-btn {
-    padding: 0.7rem 1.2rem;
+    padding: 0.8rem 1.2rem;
     border-radius: 12px;
     background: rgba(11, 18, 32, 0.7);
     color: var(--text);
@@ -214,6 +214,8 @@ a:hover { color: #5eead4; }
     text-decoration: none;
     transition: border-color 220ms ease, background 220ms ease, box-shadow 220ms ease, transform 220ms ease;
     cursor: pointer;
+    min-height: 48px;
+    -webkit-tap-highlight-color: transparent;
 }
 
 .oauth-btn:hover { transform: translateY(-2px); }
@@ -268,22 +270,26 @@ a:hover { color: #5eead4; }
 
 /* ---------------- Responsive: Mobile ---------------- */
 @media screen and (max-width: 640px) {
-    .auth-card { flex-direction: column; }
+    body { padding: 12px; align-items: flex-start; padding-top: 20px; }
+    .auth-container { border-radius: 20px; }
+    .auth-card { flex-direction: column; min-height: auto; }
 
     .brand-panel {
         width: 100%;
-        padding: 28px 24px;
+        padding: 20px 20px;
         border-right: none;
         border-bottom: 1px solid rgba(45, 212, 191, 0.18);
         flex-direction: row;
         align-items: center;
-        gap: 16px;
+        gap: 14px;
     }
 
     .brand-logo { margin-bottom: 0; }
-    .brand-tagline { font-size: 1.1rem; margin-bottom: 0; }
+    .brand-tagline { font-size: 1rem; margin-bottom: 0; line-height: 1.25; }
     .brand-sub { display: none; }
 
-    .form-box.login { padding: 28px 24px; }
-    h1 { font-size: 1.5rem; }
+    .form-box.login { padding: 24px 20px; }
+    h1 { font-size: 1.4rem; }
+
+    .oauth-btn { min-height: 50px; }
 }
