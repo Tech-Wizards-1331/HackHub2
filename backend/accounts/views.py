@@ -29,6 +29,33 @@ logger = logging.getLogger(__name__)
 
 
 # ──────────────────────────────────────────────────────────────────────────────
+# Dashboard View
+# ──────────────────────────────────────────────────────────────────────────────
+
+@never_cache
+@login_required
+def dashboard_view(request: HttpRequest) -> HttpResponse:
+    """Role-aware dashboard that inlines organizer features directly."""
+    context: dict = {}
+
+    if getattr(request.user, 'role', None) == 'organizer':
+        from organizer.models import Hackathon
+        if hasattr(request.user, 'organizer_profile'):
+            context['hackathons'] = Hackathon.objects.filter(
+                organizer=request.user.organizer_profile
+            ).order_by('-created_at')
+        else:
+            context['hackathons'] = []
+    elif getattr(request.user, 'role', None) == 'participant':
+        from organizer.models import Hackathon
+        from participant.models import Team
+        context['upcoming_hackathons'] = Hackathon.objects.filter(status='registration_open').order_by('start_date')
+        context['my_teams'] = Team.objects.filter(leader=request.user).order_by('-created_at')
+
+    return render(request, 'accounts/dashboard.html', context)
+
+
+# ──────────────────────────────────────────────────────────────────────────────
 # Internal Helpers (HTTP-layer only)
 # ──────────────────────────────────────────────────────────────────────────────
 
@@ -125,56 +152,61 @@ def logout_view(request: HttpRequest) -> HttpResponse:
 @never_cache
 @login_required
 def complete_profile_view(request: HttpRequest) -> HttpResponse:
-    """Show and process the profile-completion form for participants."""
+    """Display and edit the participant profile. Read-only when profile is complete."""
     user = request.user
     user_role = user.role or 'participant'
     is_participant = user_role == 'participant'
 
-    from participant.models import ParticipantProfile, Skill
+    from participant.models import ParticipantProfile
+    from .forms import ParticipantProfileForm
 
-    # Get or prepare the profile instance
-    try:
-        profile = user.participant_profile
-    except ParticipantProfile.DoesNotExist:
-        profile = None
+    profile = None
+    if is_participant:
+        try:
+            profile = user.participant_profile
+        except ParticipantProfile.DoesNotExist:
+            profile = None
 
-    if request.method == 'POST':
-        profile_form = ParticipantProfileForm(
-            request.POST, instance=profile
-        )
-        full_name = request.POST.get('full_name', '').strip()
-        if full_name:
-            user.full_name = full_name
+    # Determine edit mode:
+    # - Always editable on first visit (profile_complete = False)
+    # - When profile_complete = True, editable only if ?edit=1 is passed
+    profile_complete = user.is_profile_complete
+    edit_requested = request.GET.get('edit') == '1'
+    is_editable = (not profile_complete) or edit_requested
 
-        if profile_form.is_valid():
-            p = profile_form.save(commit=False)
-            p.user = user
-            p.save()
-
-            # Handle skills
-            skills_raw = request.POST.get('skills', '')
-            if skills_raw:
-                skill_names = [s.strip() for s in skills_raw.split(',') if s.strip()]
-                skill_objs = []
-                for name in skill_names[:10]:
-                    obj, _ = Skill.objects.get_or_create(name=name)
-                    skill_objs.append(obj)
-                p.skills.set(skill_objs)
-
-            user.is_profile_complete = True
-            user.save(update_fields=['full_name', 'is_profile_complete'])
-            messages.success(request, 'Profile completed successfully!')
-            return redirect('dashboard')
+    if request.method == 'POST' and is_participant and is_editable:
+        form = ParticipantProfileForm(request.POST, instance=profile)
+        if form.is_valid():
+            new_profile = form.save(commit=False)
+            new_profile.user = user
+            new_profile.save()
+            form.save_m2m()
+            # Mark profile as complete once all required fields are filled
+            if new_profile.college and new_profile.degree and new_profile.semester:
+                user.is_profile_complete = True
+                user.save(update_fields=['is_profile_complete'])
+            messages.success(request, 'Profile saved successfully!')
+            return redirect('complete_profile')
     else:
-        profile_form = ParticipantProfileForm(instance=profile)
+        form = ParticipantProfileForm(instance=profile) if (is_participant and is_editable) else None
+
+    # Skills for read-only display
+    skills = []
+    if profile and hasattr(profile, 'skills'):
+        skills = list(profile.skills.values_list('name', flat=True))
 
     context = {
-        'profile_form': profile_form,
+        'profile': profile,
         'user_role': user_role,
         'is_participant': is_participant,
         'has_github': has_social_account(user, 'github'),
+        'skills': skills,
+        'form': form,
+        'is_editable': is_editable,
+        'profile_complete': profile_complete,
     }
     return render(request, 'accounts/complete_profile.html', context)
+
 
 
 # ──────────────────────────────────────────────────────────────────────────────

@@ -109,3 +109,13 @@ Plans:
 
 Plans:
 - [x] 08-PLAN.md: Dynamic JS room builder, backend cleanup
+
+### Phase 9: participant join registration open hackathon
+
+**Goal:** [To be planned]
+**Requirements**: TBD
+**Depends on:** Phase 8
+**Plans:** 0 plans
+
+Plans:
+- [ ] TBD (run /gsd-plan-phase 9 to break down)

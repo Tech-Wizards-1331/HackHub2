@@ -58,20 +58,44 @@ class LoginForm(forms.Form):
 
 
 class ParticipantProfileForm(forms.ModelForm):
+    # Extra field: user can type a new skill not in the dropdown
+    custom_skill = forms.CharField(
+        required=False,
+        widget=forms.TextInput(attrs={
+            'class': 'form-control',
+            'placeholder': 'Add a custom skill (e.g. React, Solidity)…',
+            'id': 'id_custom_skill',
+        }),
+        label='Add Custom Skill',
+    )
+
     class Meta:
         model = ParticipantProfile
-        fields = ['college', 'semester', 'degree']
+        fields = ['college', 'semester', 'degree', 'skills']
         widgets = {
             'college': forms.TextInput(
                 attrs={'class': 'form-control', 'placeholder': 'Your college/university'}
             ),
             'semester': forms.NumberInput(
-                attrs={'class': 'form-control', 'placeholder': 'Current semester'}
+                attrs={'class': 'form-control', 'placeholder': 'Current semester (e.g. 4)'}
             ),
             'degree': forms.TextInput(
                 attrs={'class': 'form-control', 'placeholder': 'e.g. B.Tech CSE'}
             ),
+            'skills': forms.CheckboxSelectMultiple(),
         }
 
-
-
+    def save(self, commit=True):
+        """Create the custom skill (if provided) and attach it to the profile."""
+        from participant.models import Skill
+        instance = super().save(commit=False)
+        if commit:
+            instance.save()
+        # Handle custom skill
+        custom_name = self.cleaned_data.get('custom_skill', '').strip()
+        if custom_name:
+            skill, _ = Skill.objects.get_or_create(name=custom_name)
+            self.cleaned_data['skills'] = list(self.cleaned_data.get('skills', [])) + [skill]
+        if commit:
+            self.save_m2m()
+        return instance
