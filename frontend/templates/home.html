@@ -1,4 +1,4 @@
-﻿{% load static %}
+{% load static %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -69,7 +69,7 @@
         <a class="text-lg text-slate-300 hover:text-teal-300 transition-colors" href="#hackathons">Hackathons</a>
         <div class="mt-4 flex flex-col gap-3">
           <a href="{% url 'login' %}" class="inline-flex justify-center rounded-xl px-5 py-3 text-sm font-semibold border border-slate-600/60 bg-slate-900/40 text-slate-300 hover:border-teal-400/50 hover:text-teal-300 transition-all">Get Started</a>
-          <a href="#" class="btn-primary inline-flex rounded-xl px-5 py-3 text-sm font-semibold justify-center">Create Hackathon</a>
+          <a href="{% url 'login' %}" class="btn-primary inline-flex rounded-xl px-5 py-3 text-sm font-semibold justify-center">Create Hackathon</a>
         </div>
       </nav>
     </div>
@@ -90,7 +90,7 @@
 
       <div class="flex items-center gap-3">
         <a href="{% url 'login' %}" class="hidden sm:inline-flex items-center gap-1.5 rounded-lg px-4 py-2 text-sm font-medium text-slate-300 border border-slate-600/60 bg-slate-900/40 hover:border-teal-400/50 hover:text-teal-300 transition-all">Get Started</a>
-        <a href="#" class="btn-primary hidden sm:inline-flex rounded-lg px-4 py-2 text-sm font-medium">Create Hackathon</a>
+        <a href="{% url 'login' %}" class="btn-primary hidden sm:inline-flex rounded-lg px-4 py-2 text-sm font-medium">Create Hackathon</a>
         <button id="mobile-menu-btn" class="md:hidden inline-flex h-9 w-9 items-center justify-center rounded-lg border border-slate-600 bg-slate-900/60 text-slate-300 hover:border-teal-400/50 transition-colors">
           <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
         </button>
@@ -115,8 +115,8 @@
           <div class="flex items-center gap-2"><span class="h-2 w-2 rounded-full bg-rose-400"></span><span class="font-tech">99.9%</span> Uptime</div>
         </div>
         <div class="mt-8 flex flex-wrap gap-3">
-          <a href="#" class="btn-primary rounded-xl px-5 py-3 text-sm font-semibold">Create Hackathon</a>
-          <a href="#hackathons" class="btn-ghost rounded-xl px-5 py-3 text-sm font-semibold">Join Hackathon</a>
+          <a href="{% url 'login' %}" class="btn-primary rounded-xl px-5 py-3 text-sm font-semibold">Create Hackathon</a>
+          <a href="{% url 'login' %}" class="btn-ghost rounded-xl px-5 py-3 text-sm font-semibold">Join Hackathon</a>
         </div>
       </div>
 
@@ -253,7 +253,7 @@
           <div class="glass glow-ring rounded-3xl px-6 py-8 text-center">
             <p class="mb-3 text-xs uppercase tracking-[0.2em] text-rose-300 font-tech">Host Faster</p>
             <h2 class="text-2xl font-bold text-white sm:text-3xl">Ready to host your hackathon?</h2>
-            <a href="#" class="btn-primary mt-5 inline-flex rounded-xl px-5 py-3 text-sm font-semibold">Create Now</a>
+            <a href="{% url 'login' %}" class="btn-primary mt-5 inline-flex rounded-xl px-5 py-3 text-sm font-semibold">Create Now</a>
           </div>
         </div>
       </div>
