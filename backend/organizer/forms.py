@@ -11,37 +11,41 @@ class HackathonForm(forms.ModelForm):
             'start_date',
             'end_date',
             'registration_deadline',
+            'status',
             'min_team_size',
             'max_team_size',
         ]
         widgets = {
             'name': forms.TextInput(attrs={
-                'class': 'form-input',
+                'class': 'syntra-input',
                 'placeholder': 'Enter hackathon name',
             }),
             'description': forms.Textarea(attrs={
-                'class': 'form-input',
+                'class': 'syntra-input',
                 'rows': 4,
                 'placeholder': 'Describe your hackathon...',
             }),
             'start_date': forms.DateTimeInput(attrs={
-                'class': 'form-input',
+                'class': 'syntra-input',
                 'type': 'datetime-local',
             }),
             'end_date': forms.DateTimeInput(attrs={
-                'class': 'form-input',
+                'class': 'syntra-input',
                 'type': 'datetime-local',
             }),
             'registration_deadline': forms.DateTimeInput(attrs={
-                'class': 'form-input',
+                'class': 'syntra-input',
                 'type': 'datetime-local',
             }),
+            'status': forms.Select(attrs={
+                'class': 'syntra-input',
+            }),
             'min_team_size': forms.NumberInput(attrs={
-                'class': 'form-input',
+                'class': 'syntra-input',
                 'min': 1,
             }),
             'max_team_size': forms.NumberInput(attrs={
-                'class': 'form-input',
+                'class': 'syntra-input',
                 'min': 1,
             }),
         }
@@ -53,19 +57,19 @@ class ProblemStatementForm(forms.ModelForm):
         fields = ['title', 'description', 'pdf_file', 'max_teams_allowed', 'is_active']
         widgets = {
             'title': forms.TextInput(attrs={
-                'class': 'form-input',
+                'class': 'syntra-input',
                 'placeholder': 'Problem statement title',
             }),
             'description': forms.Textarea(attrs={
-                'class': 'form-input',
+                'class': 'syntra-input',
                 'rows': 4,
                 'placeholder': 'Describe the problem...',
             }),
             'pdf_file': forms.ClearableFileInput(attrs={
-                'class': 'form-input',
+                'class': 'syntra-input',
             }),
             'max_teams_allowed': forms.NumberInput(attrs={
-                'class': 'form-input',
+                'class': 'syntra-input',
                 'min': 1,
                 'placeholder': 'e.g. 5',
             }),

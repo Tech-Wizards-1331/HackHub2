@@ -5,7 +5,7 @@ from rest_framework.views import APIView
 from rest_framework.exceptions import PermissionDenied
 from django.core.cache import cache
 from django.db import transaction
-from django.db.models import Count, Case, When, F, Value, BooleanField
+from django.db.models import Count, Case, When, F, Value, BooleanField, Q
 from django.utils import timezone
 
 from organizer.models import Hackathon, ProblemStatement
@@ -51,8 +51,11 @@ class TeamViewSet(viewsets.ModelViewSet):
     permission_classes = [permissions.IsAuthenticated]
 
     def get_queryset(self):
-        # Users can only see teams they are part of
-        return Team.objects.filter(members__user=self.request.user).distinct()
+        # Team leader OR a member matched by email (TeamMember has no user FK)
+        return Team.objects.filter(
+            Q(leader=self.request.user) |
+            Q(members__email=self.request.user.email)
+        ).distinct()
 
     @action(detail=True, methods=['post'])
     def select_problem_statement(self, request, pk=None):
@@ -115,8 +118,11 @@ class TeamMemberViewSet(viewsets.ModelViewSet):
     permission_classes = [permissions.IsAuthenticated]
 
     def get_queryset(self):
-        # Users can only see members of teams they are part of
-        return TeamMember.objects.filter(team__members__user=self.request.user).distinct()
+        # Users can only see members of teams they lead or belong to (matched by email)
+        return TeamMember.objects.filter(
+            Q(team__leader=self.request.user) |
+            Q(team__members__email=self.request.user.email)
+        ).distinct()
 
     def perform_create(self, serializer):
         team = serializer.validated_data['team']

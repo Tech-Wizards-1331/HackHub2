@@ -28,6 +28,7 @@ class Team(models.Model):
     hackathon = models.ForeignKey('organizer.Hackathon', on_delete=models.CASCADE, related_name='teams')
     name = models.CharField(max_length=255)
     leader = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='led_teams')
+    is_registered = models.BooleanField(default=False)
     qr_code = models.ImageField(upload_to='team_qr_codes/', blank=True, null=True)
     food_tokens_total = models.PositiveIntegerField(default=0)
     food_tokens_used = models.PositiveIntegerField(default=0)
@@ -54,6 +55,13 @@ class TeamMember(models.Model):
     degree = models.CharField(max_length=255, blank=True)
     skills = models.ManyToManyField(Skill, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
+
+    def clean(self):
+        super().clean()
+        from django.core.exceptions import ValidationError
+        if self.team_id and self.email:
+            if TeamMember.objects.filter(email=self.email, team__hackathon=self.team.hackathon).exclude(pk=self.pk).exists():
+                raise ValidationError("This email is already registered for this hackathon.")
 
     class Meta:
         unique_together = ('team', 'email')

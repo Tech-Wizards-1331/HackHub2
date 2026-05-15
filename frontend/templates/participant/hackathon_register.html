@@ -1,0 +1,231 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Syntra | Register for {{ hackathon.name }}</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Orbitron:wght@500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .font-tech { font-family: 'Orbitron', sans-serif; }
+    </style>
+</head>
+<body class="bg-slate-950 text-slate-300 min-h-screen flex flex-col relative overflow-x-hidden selection:bg-teal-500/30">
+
+    <!-- Top Navigation -->
+    <nav class="sticky top-0 z-50 border-b border-slate-800/60 bg-slate-950/80 backdrop-blur-md">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16 items-center">
+                <div class="flex items-center gap-3">
+                    <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-teal-400 to-emerald-600 flex items-center justify-center shadow-lg shadow-teal-500/20">
+                        <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+                    </div>
+                    <span class="font-tech font-bold text-xl tracking-tight text-white">SYNTRA</span>
+                </div>
+                <div class="flex items-center gap-4">
+                    <a href="{% url 'hackathon-list' %}" class="text-sm font-medium text-slate-400 hover:text-teal-400 transition-colors">Back to List</a>
+                    <a href="{% url 'dashboard' %}" class="text-sm font-medium text-slate-400 hover:text-teal-400 transition-colors">Dashboard</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="flex-grow max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-10 w-full relative z-10">
+        
+        <div class="mb-8 border-b border-slate-800/60 pb-6">
+            <h1 class="text-3xl md:text-4xl font-bold text-white tracking-tight mb-2">Register for {{ hackathon.name }}</h1>
+            <p class="text-slate-400">Complete the wizard below to form your team and join the hackathon. Required size: {{ hackathon.min_team_size }} - {{ hackathon.max_team_size }} members.</p>
+        </div>
+
+        {% if messages %}
+            <div class="mb-8 space-y-3">
+                {% for message in messages %}
+                    <div class="p-4 rounded-xl backdrop-blur-sm border flex items-start gap-3 
+                        {% if message.tags == 'error' %}bg-red-500/10 border-red-500/20 text-red-200
+                        {% elif message.tags == 'success' %}bg-teal-500/10 border-teal-500/20 text-teal-200
+                        {% else %}bg-slate-800/50 border-slate-700/50 text-slate-200{% endif %}">
+                        <div class="flex-1 text-sm">{{ message }}</div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+
+        <div class="space-y-8">
+            <!-- Step 1: Team Name -->
+            <div class="bg-slate-900/60 border border-slate-700/60 rounded-2xl p-6 backdrop-blur-md">
+                <h3 class="text-xl font-bold text-white mb-4">1. Team Details</h3>
+                <form method="POST" action="{% url 'hackathon-register' pk=hackathon.pk %}">
+                    {% csrf_token %}
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium text-slate-300 mb-1">Team Name</label>
+                        {{ team_form.name }}
+                        <p class="text-xs text-slate-500 mt-1">Enter a unique name for your team.</p>
+                    </div>
+                    <button type="submit" name="save_team" class="px-4 py-2 bg-teal-500 hover:bg-teal-400 text-slate-950 font-semibold rounded-lg transition-colors">
+                        {% if team %}Update Team Name{% else %}Save Team & Continue{% endif %}
+                    </button>
+                </form>
+            </div>
+
+            {% if team %}
+            <!-- Step 2: Add Members -->
+            <div class="bg-slate-900/60 border border-slate-700/60 rounded-2xl p-6 backdrop-blur-md">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="text-xl font-bold text-white">2. Team Members</h3>
+                    <span class="text-sm px-2.5 py-1 rounded-md bg-slate-800 text-slate-300 border border-slate-700">
+                        {{ team.members.count|add:"1" }} / {{ hackathon.max_team_size }}
+                    </span>
+                </div>
+                
+                <p class="text-sm text-slate-400 mb-6">You are automatically included as the team leader. Add up to {{ hackathon.max_team_size|add:"-1" }} more members below.</p>
+
+                <!-- Current Members List -->
+                <div class="space-y-3 mb-6">
+                    <div class="p-4 rounded-xl border border-teal-500/30 bg-teal-500/5 flex justify-between items-center">
+                        <div>
+                            <p class="font-medium text-white">{{ request.user.get_full_name|default:request.user.email }} <span class="text-xs ml-2 px-2 py-0.5 rounded-full bg-teal-500/20 text-teal-300">Leader</span></p>
+                            <p class="text-sm text-slate-400">{{ request.user.email }}</p>
+                        </div>
+                    </div>
+                    
+                    {% for member in team.members.all %}
+                    <div class="p-4 rounded-xl border border-slate-700/50 bg-slate-800/50 flex justify-between items-center">
+                        <div>
+                            <p class="font-medium text-white">{{ member.name }}</p>
+                            <p class="text-sm text-slate-400">{{ member.email }}</p>
+                            <p class="text-xs text-slate-500 mt-1">
+                                {% if not member.college or not member.semester or not member.degree %}
+                                <span class="text-red-400">Incomplete Profile (Required before finishing)</span>
+                                {% else %}
+                                <span class="text-emerald-400">Profile Complete</span>
+                                {% endif %}
+                            </p>
+                        </div>
+                        <form method="POST" action="{% url 'hackathon-register' pk=hackathon.pk %}" class="ml-4" onsubmit="return confirm('Remove Teammate: Are you sure you want to remove this teammate?');">
+                            {% csrf_token %}
+                            <input type="hidden" name="member_id" value="{{ member.id }}">
+                            <button type="submit" name="remove_member" class="p-2 text-slate-400 hover:text-red-500 hover:bg-red-500/10 rounded-lg transition-colors">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                            </button>
+                        </form>
+                    </div>
+                    {% endfor %}
+                </div>
+
+                <!-- Add New Member Form -->
+                {% if team.members.count|add:"1" < hackathon.max_team_size %}
+                <div class="mt-6 border-t border-slate-800 pt-6">
+                    <h4 class="text-md font-semibold text-slate-200 mb-4">Add Guest Teammate</h4>
+                    <form method="POST" action="{% url 'hackathon-register' pk=hackathon.pk %}">
+                        {% csrf_token %}
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                            <div>
+                                <label class="block text-sm font-medium text-slate-300 mb-1">Name</label>
+                                {{ member_form.name }}
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-slate-300 mb-1">Email</label>
+                                {{ member_form.email }}
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-slate-300 mb-1">College</label>
+                                {{ member_form.college }}
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-slate-300 mb-1">Degree</label>
+                                {{ member_form.degree }}
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-slate-300 mb-1">Semester</label>
+                                {{ member_form.semester }}
+                            </div>
+                            <div class="md:col-span-2">
+                                <label class="block text-sm font-medium text-slate-300 mb-2">Skills</label>
+                                <div class="skills-checkbox-group">
+                                    {{ member_form.skills }}
+                                </div>
+                            </div>
+                        </div>
+                        <button type="submit" name="add_member" class="px-4 py-2 border border-slate-600 hover:border-slate-400 text-slate-200 font-medium rounded-lg transition-colors text-sm">
+                            Add Teammate
+                        </button>
+                    </form>
+                </div>
+                {% endif %}
+            </div>
+
+            <!-- Step 3: Complete -->
+            <div class="flex justify-end pt-6 gap-4">
+                <a href="{% url 'dashboard' %}" class="px-8 py-3 border border-slate-700 hover:border-slate-500 hover:bg-slate-800 text-slate-300 font-bold rounded-xl transition-all flex items-center">
+                    Save Draft & Exit
+                </a>
+                <form method="POST" action="{% url 'hackathon-register' pk=hackathon.pk %}">
+                    {% csrf_token %}
+                    <button type="submit" name="complete_registration" class="px-8 py-3 bg-teal-500 hover:bg-teal-400 text-slate-950 font-bold rounded-xl shadow-lg shadow-teal-500/20 transition-all hover:scale-[1.02]">
+                        Complete Registration
+                    </button>
+                </form>
+            </div>
+            {% endif %}
+        </div>
+    </main>
+
+    <!-- Basic CSS overrides for Django forms styling -->
+    <style>
+        input[type="text"], input[type="email"], input[type="number"], select {
+            width: 100%;
+            background-color: rgba(15, 23, 42, 0.6);
+            border: 1px solid rgba(51, 65, 85, 0.8);
+            color: #f1f5f9;
+            border-radius: 0.5rem;
+            padding: 0.5rem 0.75rem;
+            font-size: 0.875rem;
+            transition: all 0.2s;
+        }
+        input:focus, select:focus {
+            outline: none;
+            border-color: rgba(20, 184, 166, 0.5);
+            box-shadow: 0 0 0 1px rgba(20, 184, 166, 0.5);
+        }
+        
+        /* Skills Checkbox Styling */
+        .skills-checkbox-group > div {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+        .skills-checkbox-group > div > div {
+            display: inline-flex;
+        }
+        .skills-checkbox-group label {
+            display: inline-flex;
+            align-items: center;
+            padding: 0.35rem 0.8rem;
+            background-color: rgba(15, 23, 42, 0.6);
+            border: 1px solid rgba(51, 65, 85, 0.8);
+            border-radius: 9999px;
+            font-size: 0.85rem;
+            color: #cbd5e1;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            user-select: none;
+        }
+        .skills-checkbox-group label:hover {
+            border-color: rgba(20, 184, 166, 0.5);
+            background-color: rgba(20, 184, 166, 0.1);
+        }
+        .skills-checkbox-group input[type="checkbox"] {
+            display: none;
+        }
+        .skills-checkbox-group input[type="checkbox"]:checked + label,
+        .skills-checkbox-group label:has(input[type="checkbox"]:checked) {
+            background-color: rgba(20, 184, 166, 0.15);
+            border-color: rgba(20, 184, 166, 0.6);
+            color: #5eead4;
+        }
+    </style>
+</body>
+</html>

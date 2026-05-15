@@ -1,7 +1,9 @@
 import json
 
+from django.db.models import Count
+
 from django.views import View
-from django.views.generic import TemplateView, CreateView, DetailView, DeleteView
+from django.views.generic import TemplateView, CreateView, DetailView, DeleteView, UpdateView
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.contrib import messages
 from django.shortcuts import get_object_or_404, redirect
@@ -17,25 +19,14 @@ class OrganizerMixin(LoginRequiredMixin, UserPassesTestMixin):
         return getattr(self.request.user, 'role', None) == 'organizer'
 
 
-class OrganizerDashboardView(OrganizerMixin, TemplateView):
-    template_name = 'organizer/dashboard.html'
 
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        if hasattr(self.request.user, 'organizer_profile'):
-            context['hackathons'] = Hackathon.objects.filter(
-                organizer=self.request.user.organizer_profile
-            ).order_by('-created_at')
-        else:
-            context['hackathons'] = []
-        return context
 
 
 class CreateHackathonView(OrganizerMixin, CreateView):
     model = Hackathon
     form_class = HackathonForm
     template_name = 'organizer/create_hackathon.html'
-    success_url = reverse_lazy('organizer-dashboard')
+    success_url = reverse_lazy('dashboard')
 
     def form_valid(self, form):
         form.instance.organizer = self.request.user.organizer_profile
@@ -57,12 +48,37 @@ class HackathonDetailView(OrganizerMixin, DetailView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         hackathon = self.get_object()
-        context['problem_statements'] = hackathon.problem_statements.all()
+        # Annotate team counts in a single query (fetched once, cached by Django ORM)
+        context['problem_statements'] = (
+            hackathon.problem_statements
+            .annotate(teams_count=Count('selected_by_teams'))
+            .order_by('-created_at')
+        )
         context['room_configuration_json'] = json.dumps(
             hackathon.room_configuration
         ) if hackathon.room_configuration else '[]'
         context['seating_allocation'] = hackathon.seating_allocation
         return context
+
+
+class EditHackathonView(OrganizerMixin, UpdateView):
+    """Allow organizers to edit all hackathon fields."""
+    model = Hackathon
+    form_class = HackathonForm
+    template_name = 'organizer/edit_hackathon.html'
+
+    def test_func(self):
+        if not super().test_func():
+            return False
+        hackathon = self.get_object()
+        return hackathon.organizer.user == self.request.user
+
+    def get_success_url(self):
+        return reverse('organizer-hackathon-detail', kwargs={'pk': self.object.pk})
+
+    def form_valid(self, form):
+        messages.success(self.request, f'Hackathon "{form.instance.name}" updated successfully!')
+        return super().form_valid(form)
 
 
 class AddProblemStatementView(OrganizerMixin, CreateView):
@@ -91,6 +107,31 @@ class AddProblemStatementView(OrganizerMixin, CreateView):
         return context
 
 
+class EditProblemStatementView(OrganizerMixin, UpdateView):
+    """Allow organizers to edit an existing problem statement."""
+    model = ProblemStatement
+    form_class = ProblemStatementForm
+    template_name = 'organizer/edit_problem_statement.html'
+
+    def test_func(self):
+        if not super().test_func():
+            return False
+        ps = self.get_object()
+        return ps.hackathon.organizer.user == self.request.user
+
+    def get_success_url(self):
+        return reverse('organizer-hackathon-detail', kwargs={'pk': self.object.hackathon.pk})
+
+    def form_valid(self, form):
+        messages.success(self.request, f'Problem statement "{form.instance.title}" updated.')
+        return super().form_valid(form)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['hackathon'] = self.get_object().hackathon
+        return context
+
+
 class DeleteProblemStatementView(OrganizerMixin, DeleteView):
     model = ProblemStatement
 
@@ -116,7 +157,7 @@ class RunSeatingAllocationView(OrganizerMixin, View):
         hackathon = get_object_or_404(Hackathon, pk=hackathon_id)
         if hackathon.organizer.user != request.user:
             messages.error(request, 'Permission denied.')
-            return redirect('organizer-dashboard')
+            return redirect('dashboard')
 
         raw_config = request.POST.get('room_configuration', '').strip()
         if not raw_config:
