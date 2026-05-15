@@ -19,7 +19,10 @@
         .animate-fade-in { animation: fadeInUp 0.45s ease-out both; }
         .animate-fade-in-1 { animation-delay: 0.06s; }
         .animate-fade-in-2 { animation-delay: 0.12s; }
-        .syntra-input {
+        .syntra-input,
+        .syntra-input select,
+        select.syntra-input {
+            display: block;
             width: 100%;
             padding: 10px 14px;
             border-radius: 0.75rem;
@@ -30,13 +33,21 @@
             font-family: 'Inter', sans-serif;
             transition: border-color 0.2s, box-shadow 0.2s;
             outline: none;
+            box-sizing: border-box;
         }
-        .syntra-input:focus {
+        .syntra-input:focus, select.syntra-input:focus {
             border-color: rgba(45, 212, 191, 0.5);
             box-shadow: 0 0 0 3px rgba(45, 212, 191, 0.1);
         }
         .syntra-input::placeholder { color: #64748b; }
-        select.syntra-input { appearance: none; cursor: pointer; }
+        .syntra-input option { background: #0f172a; color: #e2e8f0; }
+        input[type="datetime-local"]::-webkit-calendar-picker-indicator { filter: invert(0.6); cursor: pointer; }
+        .field-error input, .field-error select, .field-error textarea {
+            border-color: rgba(239, 68, 68, 0.5) !important;
+        }
+        .field-error input:focus, .field-error select:focus, .field-error textarea:focus {
+            box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1) !important;
+        }
     </style>
 </head>
 <body class="bg-slate-950 text-slate-200 min-h-screen">
@@ -82,7 +93,12 @@
 
         {% if form.non_field_errors %}
             <div class="mb-4 rounded-xl border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-300 animate-fade-in">
-                {{ form.non_field_errors }}
+                <p class="font-semibold mb-1">Please fix the following:</p>
+                <ul class="list-disc list-inside space-y-0.5">
+                    {% for error in form.non_field_errors %}
+                        <li>{{ error }}</li>
+                    {% endfor %}
+                </ul>
             </div>
         {% endif %}
 
@@ -92,67 +108,68 @@
                 {% csrf_token %}
 
                 <!-- Name -->
-                <div class="mb-5">
+                <div class="mb-5 {% if form.name.errors %}field-error{% endif %}">
                     <label for="{{ form.name.id_for_label }}" class="block text-sm font-semibold text-slate-300 mb-2">Hackathon Name <span class="text-red-400">*</span></label>
-                    <input type="text" name="{{ form.name.html_name }}" id="{{ form.name.id_for_label }}" value="{{ form.name.value|default:'' }}" placeholder="Enter hackathon name" class="syntra-input" required>
-                    {% if form.name.errors %}<p class="mt-1 text-xs text-red-400">{{ form.name.errors.0 }}</p>{% endif %}
+                    {{ form.name }}
+                    {% if form.name.errors %}<p class="mt-1.5 text-xs text-red-400">{{ form.name.errors.0 }}</p>{% endif %}
                 </div>
 
                 <!-- Description -->
-                <div class="mb-5">
+                <div class="mb-5 {% if form.description.errors %}field-error{% endif %}">
                     <label for="{{ form.description.id_for_label }}" class="block text-sm font-semibold text-slate-300 mb-2">Description</label>
-                    <textarea name="{{ form.description.html_name }}" id="{{ form.description.id_for_label }}" rows="4" placeholder="Describe your hackathon..." class="syntra-input">{{ form.description.value|default:'' }}</textarea>
-                    {% if form.description.errors %}<p class="mt-1 text-xs text-red-400">{{ form.description.errors.0 }}</p>{% endif %}
+                    {{ form.description }}
+                    {% if form.description.errors %}<p class="mt-1.5 text-xs text-red-400">{{ form.description.errors.0 }}</p>{% endif %}
                 </div>
 
                 <!-- Dates Row -->
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-5">
-                    <div>
+                    <div class="{% if form.start_date.errors %}field-error{% endif %}">
                         <label for="{{ form.start_date.id_for_label }}" class="block text-sm font-semibold text-slate-300 mb-2">Start Date <span class="text-red-400">*</span></label>
-                        <input type="datetime-local" name="{{ form.start_date.html_name }}" id="{{ form.start_date.id_for_label }}" value="{{ form.start_date.value|default:'' }}" class="syntra-input" required>
-                        {% if form.start_date.errors %}<p class="mt-1 text-xs text-red-400">{{ form.start_date.errors.0 }}</p>{% endif %}
+                        {{ form.start_date }}
+                        {% if form.start_date.errors %}<p class="mt-1.5 text-xs text-red-400">{{ form.start_date.errors.0 }}</p>{% endif %}
                     </div>
-                    <div>
+                    <div class="{% if form.end_date.errors %}field-error{% endif %}">
                         <label for="{{ form.end_date.id_for_label }}" class="block text-sm font-semibold text-slate-300 mb-2">End Date <span class="text-red-400">*</span></label>
-                        <input type="datetime-local" name="{{ form.end_date.html_name }}" id="{{ form.end_date.id_for_label }}" value="{{ form.end_date.value|default:'' }}" class="syntra-input" required>
-                        {% if form.end_date.errors %}<p class="mt-1 text-xs text-red-400">{{ form.end_date.errors.0 }}</p>{% endif %}
+                        {{ form.end_date }}
+                        {% if form.end_date.errors %}<p class="mt-1.5 text-xs text-red-400">{{ form.end_date.errors.0 }}</p>{% endif %}
                     </div>
                 </div>
 
                 <!-- Registration Deadline -->
-                <div class="mb-5">
+                <div class="mb-5 {% if form.registration_deadline.errors %}field-error{% endif %}">
                     <label for="{{ form.registration_deadline.id_for_label }}" class="block text-sm font-semibold text-slate-300 mb-2">Registration Deadline <span class="text-red-400">*</span></label>
-                    <input type="datetime-local" name="{{ form.registration_deadline.html_name }}" id="{{ form.registration_deadline.id_for_label }}" value="{{ form.registration_deadline.value|default:'' }}" class="syntra-input" required>
-                    {% if form.registration_deadline.errors %}<p class="mt-1 text-xs text-red-400">{{ form.registration_deadline.errors.0 }}</p>{% endif %}
+                    {{ form.registration_deadline }}
+                    <p class="mt-1 text-xs text-slate-500">Must be before the hackathon start date.</p>
+                    {% if form.registration_deadline.errors %}<p class="mt-1.5 text-xs text-red-400">{{ form.registration_deadline.errors.0 }}</p>{% endif %}
                 </div>
 
                 <!-- Status -->
-                <div class="mb-5">
+                <div class="mb-5 {% if form.status.errors %}field-error{% endif %}">
                     <label for="{{ form.status.id_for_label }}" class="block text-sm font-semibold text-slate-300 mb-2">Status</label>
                     {{ form.status }}
-                    {% if form.status.errors %}<p class="mt-1 text-xs text-red-400">{{ form.status.errors.0 }}</p>{% endif %}
+                    {% if form.status.errors %}<p class="mt-1.5 text-xs text-red-400">{{ form.status.errors.0 }}</p>{% endif %}
                 </div>
 
                 <!-- Team Size Row -->
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-5">
-                    <div>
+                    <div class="{% if form.min_team_size.errors %}field-error{% endif %}">
                         <label for="{{ form.min_team_size.id_for_label }}" class="block text-sm font-semibold text-slate-300 mb-2">Min Team Size</label>
-                        <input type="number" name="{{ form.min_team_size.html_name }}" id="{{ form.min_team_size.id_for_label }}" value="{{ form.min_team_size.value|default:'' }}" min="1" class="syntra-input">
-                        {% if form.min_team_size.errors %}<p class="mt-1 text-xs text-red-400">{{ form.min_team_size.errors.0 }}</p>{% endif %}
+                        {{ form.min_team_size }}
+                        {% if form.min_team_size.errors %}<p class="mt-1.5 text-xs text-red-400">{{ form.min_team_size.errors.0 }}</p>{% endif %}
                     </div>
-                    <div>
+                    <div class="{% if form.max_team_size.errors %}field-error{% endif %}">
                         <label for="{{ form.max_team_size.id_for_label }}" class="block text-sm font-semibold text-slate-300 mb-2">Max Team Size</label>
-                        <input type="number" name="{{ form.max_team_size.html_name }}" id="{{ form.max_team_size.id_for_label }}" value="{{ form.max_team_size.value|default:'' }}" min="1" class="syntra-input">
-                        {% if form.max_team_size.errors %}<p class="mt-1 text-xs text-red-400">{{ form.max_team_size.errors.0 }}</p>{% endif %}
+                        {{ form.max_team_size }}
+                        {% if form.max_team_size.errors %}<p class="mt-1.5 text-xs text-red-400">{{ form.max_team_size.errors.0 }}</p>{% endif %}
                     </div>
                 </div>
 
                 <!-- Actions -->
-                <div class="flex items-center gap-3 pt-4 border-t border-slate-700/50">
-                    <button type="submit" class="rounded-xl bg-gradient-to-r from-yellow-500 to-amber-600 px-6 py-3 text-sm font-semibold text-white shadow-lg shadow-yellow-500/20 hover:shadow-yellow-500/40 hover:from-yellow-400 hover:to-amber-500 transition-all">
+                <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 pt-4 border-t border-slate-700/50">
+                    <button type="submit" class="flex-1 sm:flex-none rounded-xl bg-gradient-to-r from-yellow-500 to-amber-600 px-6 py-3 text-sm font-semibold text-white shadow-lg shadow-yellow-500/20 hover:shadow-yellow-500/40 hover:from-yellow-400 hover:to-amber-500 transition-all text-center">
                         💾 Save Changes
                     </button>
-                    <a href="{% url 'organizer-hackathon-detail' object.pk %}" class="rounded-xl border border-slate-600/60 bg-slate-900/40 px-6 py-3 text-sm font-medium text-slate-300 hover:border-slate-500 hover:text-slate-200 transition-all">
+                    <a href="{% url 'organizer-hackathon-detail' object.pk %}" class="flex-1 sm:flex-none rounded-xl border border-slate-600/60 bg-slate-900/40 px-6 py-3 text-sm font-medium text-slate-300 hover:border-slate-500 hover:text-slate-200 transition-all text-center">
                         Cancel
                     </a>
                 </div>

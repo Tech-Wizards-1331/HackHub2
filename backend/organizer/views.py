@@ -1,4 +1,5 @@
 import json
+import logging
 
 from django.db.models import Count
 
@@ -8,9 +9,11 @@ from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.contrib import messages
 from django.shortcuts import get_object_or_404, redirect
 from django.urls import reverse_lazy, reverse
-from .models import Hackathon, ProblemStatement
+from .models import Hackathon, OrganizerProfile, ProblemStatement
 from .forms import HackathonForm, ProblemStatementForm
 from .services.seating import get_teams_for_allocation, allocate
+
+logger = logging.getLogger(__name__)
 
 
 class OrganizerMixin(LoginRequiredMixin, UserPassesTestMixin):
@@ -29,9 +32,39 @@ class CreateHackathonView(OrganizerMixin, CreateView):
     success_url = reverse_lazy('dashboard')
 
     def form_valid(self, form):
-        form.instance.organizer = self.request.user.organizer_profile
+        # Guard: ensure the organizer profile exists — if it doesn't,
+        # show a clear error instead of a raw 500.
+        try:
+            organizer_profile = self.request.user.organizer_profile
+        except OrganizerProfile.DoesNotExist:
+            # Auto-create a minimal profile so the user can proceed.
+            organizer_profile = OrganizerProfile.objects.create(
+                user=self.request.user,
+                organization_name=self.request.user.full_name or self.request.user.email,
+            )
+            logger.warning(
+                'Auto-created OrganizerProfile for user %s — profile was missing.',
+                self.request.user.email,
+            )
+        except AttributeError:
+            messages.error(
+                self.request,
+                'Your organizer profile is not set up. Please contact an administrator.',
+            )
+            return redirect('dashboard')
+
+        form.instance.organizer = organizer_profile
         messages.success(self.request, f'Hackathon "{form.instance.name}" created successfully!')
         return super().form_valid(form)
+
+    def form_invalid(self, form):
+        # Collect all errors into a readable summary for the user.
+        error_count = sum(len(errs) for errs in form.errors.values())
+        messages.error(
+            self.request,
+            f'Please fix the {error_count} error(s) below before submitting.',
+        )
+        return super().form_invalid(form)
 
 
 class HackathonDetailView(OrganizerMixin, DetailView):
