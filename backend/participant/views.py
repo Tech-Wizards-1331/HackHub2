@@ -13,9 +13,15 @@ class HackathonListView(LoginRequiredMixin, ListView):
     model = Hackathon
     template_name = 'participant/hackathon_list.html'
     context_object_name = 'hackathons'
+    paginate_by = 12  # Limit to 12 per page to keep render times fast
 
     def get_queryset(self):
-        return Hackathon.objects.filter(status='registration_open')
+        return (
+            Hackathon.objects
+            .filter(status='registration_open')
+            .defer('room_configuration', 'seating_allocation', 'description')
+            .order_by('start_date')
+        )
 
 class HackathonRegisterWizardView(LoginRequiredMixin, View):
     def get(self, request, pk):
@@ -33,7 +39,11 @@ class HackathonRegisterWizardView(LoginRequiredMixin, View):
             return redirect('dashboard')
             
         # Check if user is already a member of another registered team
-        if TeamMember.objects.filter(email=request.user.email, team__hackathon=hackathon, team__is_registered=True).exists():
+        if TeamMember.objects.filter(
+            email=request.user.email,
+            team__hackathon=hackathon,
+            team__is_registered=True
+        ).select_related('team', 'team__hackathon').exists():
             messages.info(request, "You are already registered as a member of a team for this hackathon.")
             return redirect('dashboard')
         
@@ -60,7 +70,11 @@ class HackathonRegisterWizardView(LoginRequiredMixin, View):
             messages.info(request, "You have already registered a team for this hackathon.")
             return redirect('dashboard')
             
-        if TeamMember.objects.filter(email=request.user.email, team__hackathon=hackathon, team__is_registered=True).exists():
+        if TeamMember.objects.filter(
+            email=request.user.email,
+            team__hackathon=hackathon,
+            team__is_registered=True
+        ).select_related('team').exists():
             messages.info(request, "You are already registered as a member of a team for this hackathon.")
             return redirect('dashboard')
 
@@ -191,7 +205,8 @@ class ParticipantHackathonHubView(LoginRequiredMixin, View):
 
         ps_data, from_cache = self._get_problem_statements(hackathon)
         team_seating = self._get_team_seating(hackathon, team)
-        members = team.members.all()
+        # prefetch_related for skills avoids N+1 per member
+        members = team.members.prefetch_related('skills').all()
         is_leader = (team.leader == request.user)
 
         return render(request, 'participant/hackathon_hub.html', {

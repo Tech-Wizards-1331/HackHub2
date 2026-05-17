@@ -49,7 +49,7 @@ class Team(models.Model):
 class TeamMember(models.Model):
     team = models.ForeignKey(Team, on_delete=models.CASCADE, related_name='members')
     name = models.CharField(max_length=255)
-    email = models.EmailField()
+    email = models.EmailField(db_index=True)
     college = models.CharField(max_length=255, blank=True)
     semester = models.IntegerField(blank=True, null=True)
     degree = models.CharField(max_length=255, blank=True)

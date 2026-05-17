@@ -31,7 +31,7 @@ class Hackathon(models.Model):
     start_date = models.DateTimeField()
     end_date = models.DateTimeField()
     registration_deadline = models.DateTimeField()
-    status = models.CharField(max_length=30, choices=STATUS_CHOICES, default='registration_open')
+    status = models.CharField(max_length=30, choices=STATUS_CHOICES, default='registration_open', db_index=True)
     min_team_size = models.PositiveIntegerField(default=1)
     max_team_size = models.PositiveIntegerField(default=4)
     room_configuration = models.JSONField(null=True, blank=True)
@@ -66,6 +66,10 @@ class ProblemStatement(models.Model):
 
     class Meta:
         ordering = ['-created_at']
+        indexes = [
+            # Speeds up the common filter: is_active=True filtered by hackathon
+            models.Index(fields=['hackathon', 'is_active'], name='ps_hackathon_active_idx'),
+        ]
 
     def __str__(self):
         return f"{self.title} — {self.hackathon.name}"

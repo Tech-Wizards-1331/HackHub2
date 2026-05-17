@@ -41,16 +41,32 @@ def dashboard_view(request: HttpRequest) -> HttpResponse:
     if getattr(request.user, 'role', None) == 'organizer':
         from organizer.models import Hackathon
         if hasattr(request.user, 'organizer_profile'):
-            context['hackathons'] = Hackathon.objects.filter(
-                organizer=request.user.organizer_profile
-            ).order_by('-created_at')
+            context['hackathons'] = (
+                Hackathon.objects
+                .filter(organizer=request.user.organizer_profile)
+                # Defer large JSON blobs — only needed on detail pages
+                .defer('room_configuration', 'seating_allocation')
+                .order_by('-created_at')
+            )
         else:
             context['hackathons'] = []
     elif getattr(request.user, 'role', None) == 'participant':
         from organizer.models import Hackathon
         from participant.models import Team
-        context['upcoming_hackathons'] = Hackathon.objects.filter(status='registration_open').order_by('start_date')
-        context['my_teams'] = Team.objects.filter(leader=request.user).order_by('-created_at')
+        context['upcoming_hackathons'] = (
+            Hackathon.objects
+            .filter(status='registration_open')
+            # Only pull columns the template needs — skip the heavy JSON blobs
+            .defer('room_configuration', 'seating_allocation', 'description')
+            .order_by('start_date')
+        )
+        context['my_teams'] = (
+            Team.objects
+            .filter(leader=request.user)
+            # Join hackathon in a single query (avoids per-team hit)
+            .select_related('hackathon')
+            .order_by('-created_at')
+        )
 
     return render(request, 'accounts/dashboard.html', context)
 

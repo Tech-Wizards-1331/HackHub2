@@ -2,6 +2,7 @@ import csv
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
 from rest_framework import viewsets, permissions, status
+from rest_framework.pagination import PageNumberPagination
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.exceptions import PermissionDenied
@@ -9,6 +10,14 @@ from rest_framework.exceptions import PermissionDenied
 from .models import ProblemStatement, Hackathon
 from .api_serializers import ProblemStatementSerializer
 from .services.seating import get_teams_for_allocation, allocate
+
+
+class StandardResultsPagePagination(PageNumberPagination):
+    """20 results per page; clients can request up to 100 via ?page_size=N."""
+    page_size = 20
+    page_size_query_param = 'page_size'
+    max_page_size = 100
+
 class IsOrganizerPermission(permissions.BasePermission):
     """Only allow users with the 'organizer' role."""
 
@@ -30,6 +39,7 @@ class ProblemStatementViewSet(viewsets.ModelViewSet):
     """
     serializer_class = ProblemStatementSerializer
     permission_classes = [permissions.IsAuthenticated, IsOrganizerPermission]
+    pagination_class = StandardResultsPagePagination
 
     def get_queryset(self):
         return ProblemStatement.objects.filter(
@@ -88,11 +98,17 @@ class AllocateSeatsView(APIView):
                 status=status.HTTP_400_BAD_REQUEST
             )
 
-        allocation_result = allocate(teams, rooms_config)
-        hackathon.seating_allocation = allocation_result
-        hackathon.save()
+        # Trigger the celery background task instead of synchronous allocation
+        from .tasks import allocate_seats_task
+        task = allocate_seats_task.delay(hackathon_id)
 
-        return Response(allocation_result, status=status.HTTP_200_OK)
+        return Response(
+            {
+                "message": "Seating allocation started in the background.",
+                "task_id": task.id
+            },
+            status=status.HTTP_202_ACCEPTED
+        )
 
 
 class ExportSeatingCSVView(APIView):

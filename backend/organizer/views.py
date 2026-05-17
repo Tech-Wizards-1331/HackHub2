@@ -78,10 +78,18 @@ class HackathonDetailView(OrganizerMixin, DetailView):
         hackathon = self.get_object()
         return hackathon.organizer.user == self.request.user
 
+    def get_queryset(self):
+        """Only fetch hackathons for this organizer, with related organizer profile in one query."""
+        return (
+            Hackathon.objects
+            .select_related('organizer', 'organizer__user')
+            .filter(organizer__user=self.request.user)
+        )
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        hackathon = self.get_object()
-        # Annotate team counts in a single query (fetched once, cached by Django ORM)
+        # Use self.object — already fetched by DetailView, avoids a duplicate DB hit
+        hackathon = self.object
         context['problem_statements'] = (
             hackathon.problem_statements
             .annotate(teams_count=Count('selected_by_teams'))
