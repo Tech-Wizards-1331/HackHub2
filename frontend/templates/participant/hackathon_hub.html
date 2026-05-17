@@ -401,6 +401,7 @@
     </div>
 </div>
 
+<script src="{% static 'js/api_client.js' %}"></script>
 <script>
     const CSRF = '{{ csrf_token }}';
 
@@ -505,7 +506,7 @@
         btn.textContent = 'Selecting…';
 
         try {
-            const res = await fetch(`/api/participant/teams/${teamId}/select_problem_statement/`, {
+            const res = await fetchWithAuth(`/api/participant/teams/${teamId}/select_problem_statement/`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json', 'X-CSRFToken': CSRF },
                 body: JSON.stringify({ problem_statement_id: psId }),

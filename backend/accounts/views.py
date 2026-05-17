@@ -158,10 +158,14 @@ def logout_view(request: HttpRequest) -> HttpResponse:
     if 'application/json' in request.headers.get('Accept', ''):
         resp = JsonResponse({'ok': True})
         resp.delete_cookie('sessionid')
+        resp.delete_cookie('access')
+        resp.delete_cookie('refresh')
         return resp
 
     response = redirect('/accounts/login/')
     response.delete_cookie('sessionid')
+    response.delete_cookie('access')
+    response.delete_cookie('refresh')
     return response
 
 

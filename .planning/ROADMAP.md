@@ -119,3 +119,13 @@ Plans:
 
 Plans:
 - [ ] TBD (run /gsd-plan-phase 9 to break down)
+
+### Phase 10: Migrate token storage to HttpOnly Cookies with JWT
+
+**Goal:** [To be planned]
+**Requirements**: TBD
+**Depends on:** Phase 9
+**Plans:** 0 plans
+
+Plans:
+- [ ] TBD (run /gsd-plan-phase 10 to break down)
