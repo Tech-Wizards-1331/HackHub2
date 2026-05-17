@@ -195,20 +195,43 @@ def complete_profile_view(request: HttpRequest) -> HttpResponse:
     is_editable = (not profile_complete) or edit_requested
 
     if request.method == 'POST' and is_participant and is_editable:
-        form = ParticipantProfileForm(request.POST, instance=profile)
+        form = ParticipantProfileForm(request.POST, instance=profile, user=user)
         if form.is_valid():
             new_profile = form.save(commit=False)
             new_profile.user = user
             new_profile.save()
             form.save_m2m()
+            
+            # Save the updated full_name
+            new_full_name = form.cleaned_data.get('full_name', '').strip()
+            user_needs_update = False
+            update_fields = []
+            
+            if new_full_name and user.full_name != new_full_name:
+                user.full_name = new_full_name
+                update_fields.append('full_name')
+                user_needs_update = True
+
             # Mark profile as complete once all required fields are filled
             if new_profile.college and new_profile.degree and new_profile.semester:
-                user.is_profile_complete = True
-                user.save(update_fields=['is_profile_complete'])
+                if not user.is_profile_complete:
+                    user.is_profile_complete = True
+                    update_fields.append('is_profile_complete')
+                    user_needs_update = True
+                
+                # Assign role if missing (e.g. new social logins)
+                if not user.role:
+                    user.role = 'participant'
+                    update_fields.append('role')
+                    user_needs_update = True
+            
+            if user_needs_update:
+                user.save(update_fields=update_fields)
+                
             messages.success(request, 'Profile saved successfully!')
             return redirect('complete_profile')
     else:
-        form = ParticipantProfileForm(instance=profile) if (is_participant and is_editable) else None
+        form = ParticipantProfileForm(instance=profile, user=user) if (is_participant and is_editable) else None
 
     # Skills for read-only display
     skills = []
