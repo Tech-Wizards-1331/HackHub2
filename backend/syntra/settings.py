@@ -277,11 +277,18 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
+# Define password hashers for production (Weak CPU fix)
+PASSWORD_HASHERS = [
+    'accounts.hashers.FastPBKDF2PasswordHasher', # Fast hasher for weak CPUs
+    'django.contrib.auth.hashers.PBKDF2PasswordHasher', # Fallback for existing passwords
+    'django.contrib.auth.hashers.PBKDF2SHA1PasswordHasher',
+    'django.contrib.auth.hashers.Argon2PasswordHasher',
+    'django.contrib.auth.hashers.BCryptSHA256PasswordHasher',
+]
+
 if DEBUG:
-    # Use a fast password hasher locally to dramatically speed up logins/signups
-    PASSWORD_HASHERS = [
-        'django.contrib.auth.hashers.MD5PasswordHasher',
-    ]
+    # Override with MD5 locally for completely instant logins
+    PASSWORD_HASHERS.insert(0, 'django.contrib.auth.hashers.MD5PasswordHasher')
 
 
 # Internationalization
