@@ -44,6 +44,7 @@ SOCIAL_AUTH_BASE_HOST = urlparse(SOCIAL_AUTH_BASE_URL).netloc
 ALLOWED_HOSTS = [
     'localhost',
     '127.0.0.1',
+    'AnshPatoliya.pythonanywhere.com',
 ]
 # Add Render's .onrender.com domain and any custom domain
 _render_host = os.getenv('RENDER_EXTERNAL_HOSTNAME', '')
