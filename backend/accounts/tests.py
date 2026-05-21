@@ -6,7 +6,7 @@ User = get_user_model()
 
 class AccountsAuthTests(TestCase):
     def setUp(self):
-        self.client = Client()
+        self.client = Client(HTTP_HOST='localhost')
 
     def test_signup(self):
         url = reverse('signup')
@@ -15,7 +15,7 @@ class AccountsAuthTests(TestCase):
             'email': 'test@example.com',
             'password1': 'StrongPassword123!',
             'password2': 'StrongPassword123!'
-        })
+        }, secure=True)
         self.assertEqual(response.status_code, 302)
         self.assertTrue(User.objects.filter(email='test@example.com').exists())
 
@@ -25,6 +25,6 @@ class AccountsAuthTests(TestCase):
         response = self.client.post(url, {
             'email': 'testlogin@example.com',
             'password': 'StrongPassword123!'
-        })
+        }, secure=True)
         self.assertEqual(response.status_code, 302)
         self.assertTrue('_auth_user_id' in self.client.session)
