@@ -30,6 +30,9 @@ class Team(models.Model):
     leader = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='led_teams')
     is_registered = models.BooleanField(default=False)
     qr_code = models.ImageField(upload_to='team_qr_codes/', blank=True, null=True)
+    qr_token = models.UUIDField(unique=True, null=True, blank=True, db_index=True, editable=False)
+    is_qr_active = models.BooleanField(default=True)
+
     food_tokens_total = models.PositiveIntegerField(default=0)
     food_tokens_used = models.PositiveIntegerField(default=0)
     selected_problem_statement = models.ForeignKey(

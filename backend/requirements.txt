@@ -7,6 +7,7 @@ requests==2.32.5
 PyJWT==2.12.1
 cryptography==46.0.5
 Pillow==11.2.1
+qrcode==8.0
 
 # ── Caching ──
 django-redis==5.4.0
