@@ -98,16 +98,25 @@ class AllocateSeatsView(APIView):
                 status=status.HTTP_400_BAD_REQUEST
             )
 
-        # Trigger the celery background task instead of synchronous allocation
-        from .tasks import allocate_seats_task
-        task = allocate_seats_task.delay(hackathon_id)
+        from django.db import transaction
+
+        try:
+            allocation_result = allocate(teams, rooms_config)
+            with transaction.atomic():
+                locked_hackathon = Hackathon.objects.select_for_update().get(id=hackathon_id)
+                locked_hackathon.seating_allocation = allocation_result
+                locked_hackathon.save(update_fields=['seating_allocation'])
+        except Exception as e:
+            return Response(
+                {"error": f"Failed to allocate seating: {str(e)}"},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
 
         return Response(
             {
-                "message": "Seating allocation started in the background.",
-                "task_id": task.id
+                "message": "Seating allocation completed successfully."
             },
-            status=status.HTTP_202_ACCEPTED
+            status=status.HTTP_200_OK
         )
 
 

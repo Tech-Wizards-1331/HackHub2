@@ -94,7 +94,6 @@ INSTALLED_APPS = [
     'allauth.socialaccount',
     'allauth.socialaccount.providers.google',
     'allauth.socialaccount.providers.github',
-    'django_celery_beat',
     'accounts',
     'organizer',
     'participant',
@@ -328,18 +327,15 @@ else:
         }
     }
 
-# ── Celery & Background Jobs ──────────────────────────────────────────────────
-# Default to Redis db 1 for Celery to keep it separate from the cache (db 0).
-CELERY_BROKER_URL = os.environ.get('CELERY_BROKER_URL', REDIS_URL) or 'redis://localhost:6379/1'
-CELERY_RESULT_BACKEND = os.environ.get('CELERY_RESULT_BACKEND', CELERY_BROKER_URL)
-CELERY_ACCEPT_CONTENT = ['json']
-CELERY_TASK_SERIALIZER = 'json'
-CELERY_RESULT_SERIALIZER = 'json'
+# Keep session auth for template pages without writing every login to
+# django_session. Set SESSION_ENGINE in the environment to override this.
+SESSION_ENGINE = os.getenv(
+    'SESSION_ENGINE',
+    'django.contrib.sessions.backends.signed_cookies',
+)
 
-# Since Redis isn't natively supported on Windows, we bypass the worker in local dev
-# by forcing Celery to run tasks synchronously when DEBUG=True.
-CELERY_TASK_ALWAYS_EAGER = DEBUG
-
+# Updating last_login adds an extra user-table write to every successful login.
+AUTH_UPDATE_LAST_LOGIN = os.getenv('AUTH_UPDATE_LAST_LOGIN', 'False').lower() in ('true', '1', 'yes')
 
 # ── Logging ───────────────────────────────────────────────────────────────────
 LOGGING = {
