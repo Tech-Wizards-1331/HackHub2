@@ -20,10 +20,15 @@ class ProblemStatementSerializer(serializers.ModelSerializer):
 
 
 class ScanCategorySerializer(serializers.ModelSerializer):
+    scan_count = serializers.SerializerMethodField()
+
     class Meta:
         model = ScanCategory
-        fields = ['id', 'hackathon', 'name', 'is_active', 'display_order', 'created_at']
+        fields = ['id', 'hackathon', 'name', 'is_active', 'display_order', 'created_at', 'scan_count']
         read_only_fields = ['id', 'created_at']
+
+    def get_scan_count(self, obj):
+        return getattr(obj, 'scan_count', None) or obj.scan_records.count()
 
 
 class ScannerScanRequestSerializer(serializers.Serializer):

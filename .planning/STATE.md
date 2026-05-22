@@ -7,7 +7,7 @@ stopped_at: Phase 10 context gathered
 last_updated: "2026-05-21T16:04:50.613Z"
 last_activity: 2026-05-21
 progress:
-  total_phases: 11
+  total_phases: 12
   completed_phases: 4
   total_plans: 10
   completed_plans: 4
@@ -51,6 +51,7 @@ Progress: [█████░░░░░] 50%
 | 03 | 1 | - | - |
 | 11 | 1 | - | - |
 | 10 | 1 | - | - |
+| 12 | 0 | - | - |
 
 **Recent Trend:**
 
@@ -73,6 +74,7 @@ Progress: [█████░░░░░] 50%
 - Phase 9 added: participant join registration open hackathon
 - Phase 10 added: Migrate token storage to HttpOnly Cookies with JWT
 - Phase 11 added: Build a production-ready real-time QR scanner system for Syntra hackathons using a “One QR per Team” architecture
+- Phase 12 added: build the UI for displaying the QR code to participants and/or creating a scanning interface for organizers!
 
 ### Decisions
 
@@ -95,6 +97,9 @@ Recent decisions affecting current work:
 | # | Description | Date | Commit | Directory |
 |---|-------------|------|--------|-----------|
 | 260521-s5c | Remove Celery configuration, dependencies, and code, and run seating allocation synchronously | 2026-05-21 | 89b3dd4 | [260521-s5c-remove-celery-configuration-dependencies](./quick/260521-s5c-remove-celery-configuration-dependencies/) |
+| 260522-a3f | Implement Scan Categories Management section on the Organizer Detail page | 2026-05-22 | pending | [260522-a3f-implement-scan-categories-management](./quick/260522-a3f-implement-scan-categories-management/) |
+| 260522-b4c | Fix team member count displaying 0 on participant QR page and enable team leader scanning | 2026-05-22 | pending | [260522-b4c-fix-member-count-and-leader-scanning](./quick/260522-b4c-fix-member-count-and-leader-scanning/) |
+
 
 ## Deferred Items
 

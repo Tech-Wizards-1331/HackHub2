@@ -112,7 +112,7 @@ class QRScannerSystemTests(APITestCase):
         response = self.client.post(self.scan_url, payload)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data['team_name'], self.team.name)
-        self.assertEqual(len(response.data['members']), 2)
+        self.assertEqual(len(response.data['members']), 3)
 
     def test_coordinator_scanner_access_success(self):
         """Verify assigned active coordinator can scan and submit."""
@@ -240,3 +240,75 @@ class QRScannerSystemTests(APITestCase):
         }
         response = self.client.post(self.scan_url, payload)
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+    def test_create_scan_category_success(self):
+        """Verify organizer and coordinator can create scan categories, but unauthorized users cannot."""
+        url = reverse('scancategory-list')
+        
+        # 1. Organizer create
+        self.client.force_authenticate(user=self.organizer_user)
+        payload = {
+            "hackathon": self.hackathon.id,
+            "name": "New Category Org",
+            "is_active": True,
+            "display_order": 1
+        }
+        response = self.client.post(url, payload)
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertTrue(ScanCategory.objects.filter(name="New Category Org").exists())
+
+        # 2. Coordinator create
+        self.client.force_authenticate(user=self.coordinator_user)
+        payload = {
+            "hackathon": self.hackathon.id,
+            "name": "New Category Coord",
+            "is_active": True,
+            "display_order": 2
+        }
+        response = self.client.post(url, payload)
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertTrue(ScanCategory.objects.filter(name="New Category Coord").exists())
+
+        # 3. Unauth user create
+        self.client.force_authenticate(user=self.unauth_user)
+        payload = {
+            "hackathon": self.hackathon.id,
+            "name": "New Category Unauth",
+            "is_active": True,
+            "display_order": 3
+        }
+        response = self.client.post(url, payload)
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+    def test_delete_scan_category_prevented_when_scan_records_exist(self):
+        """Verify that a category cannot be deleted if it has scan records."""
+        # Create scan record
+        ScanRecord.objects.create(
+            team_member=self.member1,
+            scan_category=self.category,
+            scanned_by=self.organizer_user
+        )
+
+        detail_url = reverse('scancategory-detail', kwargs={'pk': self.category.id})
+        
+        # Authenticate as organizer
+        self.client.force_authenticate(user=self.organizer_user)
+        
+        # Delete attempt
+        response = self.client.delete(detail_url)
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertIn("associated scan records", response.data['detail'])
+        # Category should still exist
+        self.assertTrue(ScanCategory.objects.filter(id=self.category.id).exists())
+
+    def test_delete_scan_category_success_when_empty(self):
+        """Verify category can be deleted if no scan records exist."""
+        detail_url = reverse('scancategory-detail', kwargs={'pk': self.category.id})
+        
+        # Authenticate as organizer
+        self.client.force_authenticate(user=self.organizer_user)
+        
+        # Delete attempt
+        response = self.client.delete(detail_url)
+        self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
+        self.assertFalse(ScanCategory.objects.filter(id=self.category.id).exists())

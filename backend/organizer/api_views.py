@@ -8,6 +8,7 @@ from rest_framework.response import Response
 from rest_framework.exceptions import PermissionDenied
 
 from django.db import models, transaction, IntegrityError
+from django.db.models import Q, Count
 from rest_framework.exceptions import PermissionDenied, ValidationError
 from .models import ProblemStatement, Hackathon, ScanCategory, ScanRecord, HackathonCoordinator
 from .api_serializers import ProblemStatementSerializer, ScanCategorySerializer, ScannerScanRequestSerializer, ScannerSubmitRequestSerializer
@@ -167,18 +168,60 @@ class ExportSeatingCSVView(APIView):
 
 class ScanCategoryViewSet(viewsets.ModelViewSet):
     serializer_class = ScanCategorySerializer
-    permission_classes = [permissions.IsAuthenticated, IsOrganizerPermission]
+    permission_classes = [permissions.IsAuthenticated, IsScannerAuthorized]
 
     def get_queryset(self):
-        return ScanCategory.objects.filter(
-            hackathon__organizer__user=self.request.user
-        )
+        user = self.request.user
+        if user.is_staff or getattr(user, 'role', None) == 'super_admin':
+            queryset = ScanCategory.objects.all()
+        else:
+            queryset = ScanCategory.objects.filter(
+                Q(hackathon__organizer__user=user) |
+                Q(hackathon__coordinators__user=user, hackathon__coordinators__is_active=True)
+            ).distinct()
+            
+        hackathon_id = self.request.query_params.get('hackathon')
+        if hackathon_id:
+            queryset = queryset.filter(hackathon_id=hackathon_id)
+        return queryset.annotate(scan_count=Count('scan_records')).order_by('display_order', 'created_at')
 
     def perform_create(self, serializer):
         hackathon = serializer.validated_data['hackathon']
-        if hackathon.organizer.user != self.request.user:
-            raise PermissionDenied("You can only add categories to your own hackathons.")
+        user = self.request.user
+        is_authorized = False
+        if user.is_staff or getattr(user, 'role', None) == 'super_admin':
+            is_authorized = True
+        elif getattr(user, 'role', None) == 'organizer' and hackathon.organizer.user == user:
+            is_authorized = True
+        else:
+            is_authorized = hackathon.coordinators.filter(user=user, is_active=True).exists()
+            
+        if not is_authorized:
+            raise PermissionDenied("You can only add categories to hackathons you organize or coordinate.")
         serializer.save()
+
+    def perform_update(self, serializer):
+        hackathon = serializer.validated_data.get('hackathon', serializer.instance.hackathon)
+        user = self.request.user
+        is_authorized = False
+        if user.is_staff or getattr(user, 'role', None) == 'super_admin':
+            is_authorized = True
+        elif getattr(user, 'role', None) == 'organizer' and hackathon.organizer.user == user:
+            is_authorized = True
+        else:
+            is_authorized = hackathon.coordinators.filter(user=user, is_active=True).exists()
+            
+        if not is_authorized:
+            raise PermissionDenied("You can only edit categories for hackathons you organize or coordinate.")
+        serializer.save()
+
+    def destroy(self, request, *args, **kwargs):
+        instance = self.get_object()
+        if instance.scan_records.exists():
+            raise ValidationError(
+                {"detail": "Cannot delete category as it already has associated scan records."}
+            )
+        return super().destroy(request, *args, **kwargs)
 
 
 class ScannerScanView(APIView):

@@ -48,6 +48,30 @@ class Team(models.Model):
     def __str__(self):
         return f"{self.name} ({self.hackathon.name})"
 
+    def save(self, *args, **kwargs):
+        super().save(*args, **kwargs)
+        if self.is_registered:
+            from .models import TeamMember
+            leader_profile = getattr(self.leader, 'participant_profile', None)
+            college = leader_profile.college if leader_profile else ""
+            semester = leader_profile.semester if leader_profile else None
+            degree = leader_profile.degree if leader_profile else ""
+            
+            TeamMember.objects.get_or_create(
+                team=self,
+                email=self.leader.email,
+                defaults={
+                    'name': self.leader.full_name or self.leader.email,
+                    'college': college,
+                    'semester': semester,
+                    'degree': degree,
+                }
+            )
+        else:
+            from .models import TeamMember
+            TeamMember.objects.filter(team=self, email=self.leader.email).delete()
+
+
 
 class TeamMember(models.Model):
     team = models.ForeignKey(Team, on_delete=models.CASCADE, related_name='members')

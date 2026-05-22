@@ -139,3 +139,13 @@ Plans:
 
 Plans:
 - [x] TBD (run /gsd-plan-phase 11 to break down) (completed 2026-05-21)
+
+### Phase 12: build the UI for displaying the QR code to participants and/or creating a scanning interface for organizers!
+
+**Goal:** [To be planned]
+**Requirements**: TBD
+**Depends on:** Phase 11
+**Plans:** 0 plans
+
+Plans:
+- [ ] TBD (run /gsd-plan-phase 12 to break down)
